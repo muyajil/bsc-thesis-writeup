@@ -1,27 +1,42 @@
-\ProvidesPackage{style}
+\documentclass[12pt,a4paper]{report}
+\usepackage{graphicx}
+\usepackage{ifpdf}
+\ifpdf
+   % put here packages only for the PDF:
+   \DeclareGraphicsExtensions{.pdf,.png,.jpg,.mps}
+   \usepackage{hyperref} 
+\else
+   % put here packages only for the DVI:
+\fi
 
-\documentclass{article}
+% put all the other packages here:
+
+\usepackage{mystyle}
 
 \begin{document}
 
 \input{./tex/titlepage.tex}
-
-\input{./tex/contents.tex}
+%\maketitle
+\tableofcontents
+\listoffigures
+\listoftables
 
 \input{./tex/introduction.tex}
-
 \input{./tex/motivating_examples.tex}
-
 \input{./tex/background.tex}
-
 \input{./tex/architecture.tex}
-
 \input{./tex/algorithms.tex}
-
 \input{./tex/experiments.tex}
+\input{./tex/related_work.tex}
+\input{./tex/conclusion.tex}
 
-\input{./related_work.tex}
+\appendix
+\input{./tex/appendix.tex}
 
-\input{./conclusion.tex}
+
+% Bibliography:
+\clearpage
+\addcontentsline{toc}{chapter}{Bibliography}
+\input{./tex/bibliography.tex}
 
 \end{document}
