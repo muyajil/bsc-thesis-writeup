@@ -1,4 +1,4 @@
-\documentclass[12pt,a4paper]{report}
+\documentclass[12pt,a4paper]{article}
 \usepackage{graphicx}
 \usepackage{ifpdf}
 \ifpdf
@@ -11,23 +11,30 @@
 
 % put all the other packages here:
 
-\usepackage{mystyle}
+\usepackage{style}
 
 \begin{document}
 
 \input{./tex/titlepage.tex}
 %\maketitle
 \tableofcontents
-\listoffigures
-\listoftables
+
+\newpage
 
 \input{./tex/introduction.tex}
+\newpage
 \input{./tex/motivating_examples.tex}
+\newpage
 \input{./tex/background.tex}
+\newpage
 \input{./tex/architecture.tex}
+\newpage
 \input{./tex/algorithms.tex}
+\newpage
 \input{./tex/experiments.tex}
+\newpage
 \input{./tex/related_work.tex}
+\newpage
 \input{./tex/conclusion.tex}
 
 \appendix
