@@ -1,1 +1,19 @@
 \section{Introduction}
+
+Points to include in the paragraph:
+
+\begin{itemize}
+	\item SQL access control is broken.
+	\item Existing mechanisms do a good job when it comes to direct access to data.
+	\item Problems occur when users of a database try to access data indirectly by using advanced features of DBMS
+	\item The root of the problem is not that vendors do not follow the state-of-the-art.
+	\item The theoretical foundations of database security lack adequate security definitions.
+	\item In the paper of Guarnieri et. al such security definitions and a suitable access control algorithm are proposed.
+	\item In this thesis we explore the possibility of implementing this algorithm in a state-of-the-art DBMS.
+	\item 
+\end{itemize}
+
+When storing sensitive information in databases it is essential to control access to it. For this the SQL database vendors have adapted the access control rules defined in the SQL standard and developed access control mechanisms satisfying these rules. The rules however do not define a precise semantics or the attacker model, therefore the implementations cannot provide security guarantees or means to verify them.
+These rules actually do quite a good job when it comes to controlling access directly to the data, using standard SQL queries. However if an attacker leverages the advanced features of popular Database Management System, it is shown by Guarnieri et al. that it is possible to perform two kinds of powerful attacks, Integrity attacks allowing the attacker to perform non-authorized changes to the database and Confidentiality attacks, that allow the attacker to learn sensitive information.\\
+Guarnieri et al. have further proposed an attacker model, an access control semantics and precise security properties. They have used these to develop a strong and provably secure access control algortihm.\\
+This thesis explores the possibility of implementing this algorithm in a state-of-the-art DBMS. After mounting these attacks on several popular DBMS, it was found out that PostgreSQL is vulnerable to all of the proposed attacks, and therefore PostgreSQL was chosen to implement this algorithm.
