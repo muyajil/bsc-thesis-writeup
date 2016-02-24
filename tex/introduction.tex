@@ -5,15 +5,57 @@ Points to include in the paragraph:
 \begin{itemize}
 	\item SQL access control is broken.
 	\item Existing mechanisms do a good job when it comes to direct access to data.
-	\item Problems occur when users of a database try to access data indirectly by using advanced features of DBMS
+	\item Problems occur when users of a database try to access data indirectly by using advanced features of DBMS \remark{You must first define direct and indirect access.}
 	\item The root of the problem is not that vendors do not follow the state-of-the-art.
 	\item The theoretical foundations of database security lack adequate security definitions.
-	\item In the paper of Guarnieri et. al such security definitions and a suitable access control algorithm are proposed.
+	\item In the paper of Guarnieri et. al such security definitions and a suitable access control algorithm are proposed. \remark{This seems to contradict the previous statement.}
 	\item In this thesis we explore the possibility of implementing this algorithm in a state-of-the-art DBMS.
 	\item 
 \end{itemize}
 
 When storing sensitive information in databases it is essential to control access to it. For this the SQL database vendors have adapted the access control rules defined in the SQL standard and developed access control mechanisms satisfying these rules. The rules however do not define a precise semantics or the attacker model, therefore the implementations cannot provide security guarantees or means to verify them.
-These rules actually do quite a good job when it comes to controlling access directly to the data, using standard SQL queries. However if an attacker leverages the advanced features of popular Database Management System, it is shown by Guarnieri et al. that it is possible to perform two kinds of powerful attacks, Integrity attacks allowing the attacker to perform non-authorized changes to the database and Confidentiality attacks, that allow the attacker to learn sensitive information.\\
+These rules actually do quite a good job when it comes to controlling access directly to the data, using standard SQL queries. However if an attacker leverages the advanced features of popular Database Management Systems, it is shown by Guarnieri et al. that it is possible to perform two kinds of powerful attacks, Integrity attacks allowing the attacker to perform non-authorized changes to the database and Confidentiality attacks, that allow the attacker to learn sensitive information.\\
 Guarnieri et al. have further proposed an attacker model, an access control semantics and precise security properties. They have used these to develop a strong and provably secure access control algortihm.\\
 This thesis explores the possibility of implementing this algorithm in a state-of-the-art DBMS. After mounting these attacks on several popular DBMS, it was found out that PostgreSQL is vulnerable to all of the proposed attacks, and therefore PostgreSQL was chosen to implement this algorithm.
+\remark{We need a strong motivation. Why do we need the work in this thesis? How does it improve the state-of-the-art? Why should a database administrator read the thesis and use what we propose?}
+
+\medskip
+\remark{I tried to (1) quickly write the first two paragraphs of the introduction, and (2) outline the next paragraphs. Feel free to use it as a starting point. Recall that it is \emph{your} thesis, so modify it :-)}  
+Regulating access to the data stored in databases is \emph{essential} to prevent leakages of sensitive information.
+%
+To this end, the SQL standard defines an access control model, which has accordingly been adopted by commercial Database Management Systems (DBMSs).
+%
+While this access control model effectively regulate \emph{direct access}, i.e., through \texttt{SELECT} queries, to the data, it falls far short of preventing \emph{indirect access} to sensitive data.
+%
+Namely, attackers can exploit advanced database features, such as triggers and views, as well as the DBMS' semantics to infer sensitive information from sequences of authorized commands~\cite{guarnieri2016strong, ..., ..., ...}.
+%  
+This is not due to misconfigured systems or software vulnerabilities.
+%
+Rather, it is due to the  unrealistic security assumptions on which the SQL access control model relies, namely attackers can only infer information from \texttt{SELECT} queries' results without being able to infer information from other aspects of the system's behaviour.
+
+Recently, Guarnieri et al.~\cite{guarnieri2016strong} investigated the limitations of the SQL access control model.
+%
+They identified two families of attacks that attackers can carry out by exploiting advanced database features and  the DBMS' semantics.  
+%
+\emph{Integrity attacks} allow an attacker to perform non-authorized changes to the database, whereas \emph{confidentiality attacks} allow an attacker to learn sensitive information.
+%
+They also developed a formal framework, consisting of formal database semantics and attacker model as well as precise security properties, to reason about the precise security guarantees offered by access control mechanisms in database systems.
+%
+Using this framework, they developed an access control mechanism that provably prevent both integrity and confidentiality attacks.
+
+\remark{The third paragraph should clearly identify (1) the weaknesses and limitations of existing solutions (such as~\cite{guarnieri2016strong}), and (2) why they cannot be used in practice. This is \underline{the} paragraph where we say that everything is bad. Later we will show how this thesis saves the world.}
+
+\smallskip
+\noindent
+{\bf Contributions.}
+%
+\remark{Here, you should list all the contributions of the thesis.
+%
+For each contribution, you should explain (1) why is it important and meaningful, and (2) how it improves the state-of-the-art.
+%
+ Note that contributions $\neq$ list of things that you did. A contribution is something new that improves the state-of-the-art. After this section, the reader must be convinced that the work in this thesis is an important contribution to humanity :-)}
+
+\smallskip
+\noindent
+{\bf Organization.}
+\remark{In Chapter X we do A. In Chapter Y we do B. \ldots}
