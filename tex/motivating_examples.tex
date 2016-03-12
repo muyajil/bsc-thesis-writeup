@@ -1,1 +1,60 @@
 \section{Motivating Examples}
+
+We show here how attackers can exploit advanced features of DBMSs to perform attacks on the system as presented in~\cite{guarnieri2016strong}.
+%
+These attacks are classified in two families: \emph{Integrity attacks} and \emph{Confidentiality attacks}.
+%
+In the former, the attacker is able to make unauthorized changes to the database, thus violating the integrity of the database from a security point of view.
+%
+In the latter, the attacker manages to learn sensitive information from the database, that according to the security policy, should not be disclosed to the attacker.
+%
+Guarnieri et al. have mounted these attacks manually against several widely used DBMS with shocking results: No existing access control mechanism is able to fully prevent these attacks.
+
+\subsection{Integrity Attacks}
+
+Here we present integrity attacks. 
+%
+The following attacks use \texttt{INSERT}, \texttt{DELETE}, \texttt{GRANT}, and \texttt{REVOKE} commands together with views and triggers, which are procedures automatically executed by the DBMS in response to user commands.
+
+In the first attack the attacker will use triggers to execute an unauthorized command on the database system. The trigger will be executed by an unaware user with a higher security clearance.
+
+\begin{attack}
+\bf{Trigger with activator's privileges:}
+Consider a database with two tables $P$ and $S$ and two users $u$ and $w$. The attacker is the user $u$ whose goal is to delete the contents of $S$. The policy is as follows: $u$ is not authorized to alter $S$, $u$ can create triggers on $P$, and $w$ can read and modify $S$ and $P$. The attack is as follows:
+\begin{enumerate}
+\item $u$ creates the following trigger:
+	\begin{verbatim}
+	CREATE TRIGGER t ON P AFTER INSERT
+    DELETE * FROM S
+	\end{verbatim}
+\item $u$ waits until $w$ insers a tuple into the table $P$. The trigger will then be invoked using $w$'s and $S$'s content will be deleted.
+\end{enumerate}
+\end{attack}
+
+By replacing the \texttt{DELETE} command inside the trigger with a \texttt{GRANT} command an attacker can also escalate his privileges.
+
+In the second attack the attacker will use views to escalate his privileges. He will delegate read privileges, without having the necessary permissions on the origin table.
+
+\begin{attack}
+\bf{Grating views:}
+Consider a database with a table $S$ and two users $u$ and $v$, and the following policy: $u$ can create views and read $S$, but cannot delegate read permissions on $S$. $v$ cannot read $S$. The attacker is $u$ who will allow the unprivileged user $v$ to read the contents of $S$:
+\begin{enumerate}
+\item $u$ creates the view $V$:
+	\begin{verbatim}
+	CREATE VIEW V AS
+	SELECT * FROM S;
+	\end{verbatim}
+\item $u$ issues the command:
+	\begin{verbatim}
+	GRANT SELECT ON V TO v;
+	\end{verbatim}
+\end{enumerate}
+Now $v$ can read the contents of $S$ through $V$.
+\end{attack}
+
+\subsection{Confidentiality Attacks}
+
+In the following we will present confidentiality attacks.
+
+
+

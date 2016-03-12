@@ -1,13 +1,13 @@
 \section{Introduction}
-When storing sensitive information in databases it is \emph{essential} to control access to it. 
+When storing sensitive information in databases it is \emph{essential} to restrict access to it. 
 %
 For this the SQL standard defines an access control model, which has been implemented by commercial Database Management Systems (DBMSs). 
 %
-This access control model effectively regulates \emph{direct access}, i.e., through \texttt{SELECT} queries, to the data, it falls far short of preventing \emph{indirect access} to sensitive data.
+This access control model successfully regulates \emph{direct access}, i.e., through \texttt{SELECT} queries, to the data. It however falls far short of preventing \emph{indirect access} to sensitive data.
 %
 Namely, attackers can exploit advanced database features, such as triggers and views, as well as the DBMS' semantics to infer sensitive information from sequences of authorized commands~\cite{guarnieri2016strong, ..., ..., ...}.
 %
-These attacks are not possible due to misconfigured systems or software vulnerabilities. Rather, it is due to the unrealistic security assumptions on which the SQL access control model relies, namely attackers can only infer information from \texttt{SELECT} queries' results withouth being able to infer information from other aspects of the systems behaviour.
+The mentioned attacks are possible due to the unrealistic security assumtions on which the SQL access control model relies, namely attackers can only infer information from \texttt{SELECT} queries' results without being able to infer information from other aspects of the system's behaviour.
 
 Recently, Guarnieri et al.~\cite{guarnieri2016strong} investigated the limitations of the SQL access control model. They identified two families of attacks that attackers can carry out by exploiting advanced database features and the DBMS' semantics.
 %
@@ -21,11 +21,13 @@ Using this framework, they developed an open access control mechanism that prova
 
 \remark{The third paragraph should clearly identify (1) the weaknesses and limitations of existing solutions (such as~\cite{guarnieri2016strong}), and (2) why they cannot be used in practice. This is \underline{the} paragraph where we say that everything is bad. Later we will show how this thesis saves the world.}
 
-However solutions such as the one proposed by Guarnieri et al. have several limitations in practice.
+The framework proposed by Guarnieri et al., has several limitations in practice.
 %
-For one the depicted model supports the relational algebra, which uses a set semantics, whereas SQL uses a bag sematics.
+For one the formulated model is based on the relational algebra. 
 %
-Furthermore the algorithm produced by Guarnieri et al. implemented as proposed, would produce a very large overhead, up to 200\%.
+The reality, however is that DMBS are based on SQL, which differs from the relational algebra, and therefore posing several challenges for the implementation in a state-of-the-art DBMS.
+%
+Furthermore, due to the strong security requirements of the algorithm, a straight forward implementation would introduce an overhead of up to 200\%, thus the implementation needs to make use of heuristics to speed up the access control decision.
 %
 
 \remark{What are other limitations here? Until now I have only met these :)}
@@ -35,16 +37,19 @@ Furthermore the algorithm produced by Guarnieri et al. implemented as proposed, 
 \smallskip
 \noindent
 {\bf Contributions.}
-This thesis explores the possibility of implementing a solution such as the one proposed by Guarnieri et al.~\cite{guarnieri2016strong} in a state-of-the-art DBMS.
+The original implementation of PostgreSQL access control is not handled uniformly, depending on the type of query there are different functions deciding if a query is authorized or not. 
 %
-After mounting the attacks agains several popular DBMS it was found that PostgreSQL is the most vulnerable, failing to prevent both attack families.
+Therefore the implementation of a new algorithm requires much more understanding of the backend architecture of PostgreSQL than actually need to implement and verify the algorithm.
 %
-In the course of pursuing this implementation several contributions were made.
+The first contribution of this thesis is, that the codebase of PostgreSQL was refactored, moving all access control relevant code behind a uniform interface.
 %
-First the codebase of PostgreSQL was refactored in such a way, that all access control relevant code is located in one module, making it easier for future extensions or improvements, while also allowing to implement any other access control algorithm as a plug-in for the main software.
-%
-Second the semantics of the algorithm from~\cite{guarnieri2016strong} was extended from the relational algebra to SQL, and therefore enabling the implementation of this algorithm into existing DBMSs. Thus it is possible to have a provably secure access control algorithm in widely used database systems.
+This provides the possibility of improving and extending access control without interfering with the internals of the DBMS.
 
+As mentioned above the framework proposed by Guarnieri et al. lacks support for SQL. 
+%
+As a second contribution, the rules building this framework were extended to the semantics of SQL, therefore allowing it to be implemented in a DBMS.
+
+Furthermore the algorithm has severe performance issues, another contribution of this thesis is to identify heuristics that can be used to increase the performance of this algorithm.
 %
 \remark{Here, you should list all the contributions of the thesis.
 %
@@ -56,16 +61,7 @@ For each contribution, you should explain (1) why is it important and meaningful
 \smallskip
 \noindent
 {\bf Organization.}
-\remark{just to quickly enumerate all chapters}
-\begin{enumerate}
-	\item Motivating examples
-	\item Background
-	\item Architecture
-	\item Algorithms
-	\item Experiments
-	\item Related Work
-	\item Conclusion/Future work
-\end{enumerate}
+%
 In the next chapter we will introduce some motivating examples of attacks from both families. 
 %
 In chapter 3 we will give background information about the advanced features that can be exploited. 
@@ -79,4 +75,3 @@ Furthermore we will conduct experiments with state-of-the-art benchmark database
 In chapter 7 we will introduce some related work to the thesis. 
 %
 Finally in chapter 8 the conclusions are drawn and future possibilities are discussed.
-\remark{In Chapter X we do A. In Chapter Y we do B. \ldots}

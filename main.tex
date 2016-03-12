@@ -1,19 +1,5 @@
 \documentclass[12pt,a4paper]{article}
-\usepackage{graphicx}
-\usepackage{ifpdf}
-\ifpdf
-   % put here packages only for the PDF:
-   \DeclareGraphicsExtensions{.pdf,.png,.jpg,.mps}
-   \usepackage{hyperref} 
-\else
-   % put here packages only for the DVI:
-\fi
-
-% put all the other packages here:
-\usepackage{amssymb}
-\usepackage [table]{xcolor} 
 \usepackage{style}
-\newcommand{\remark}[1]{\textcolor{red}{$\blacktriangleright$\textbf{#1}$\blacktriangleleft$}}
 
 \begin{document}
 
@@ -38,14 +24,15 @@
 \input{./tex/related_work.tex}
 \newpage
 \input{./tex/conclusion.tex}
-
+\newpage
 \appendix
 \input{./tex/appendix.tex}
 
 
 % Bibliography:
 \clearpage
-\addcontentsline{toc}{chapter}{Bibliography}
-\input{./tex/bibliography.tex}
+\addcontentsline{toc}{section}{Bibliography}
+\bibliographystyle{abbrv}
+\bibliography{main}
 
 \end{document}
