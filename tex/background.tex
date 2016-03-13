@@ -1,3 +1,49 @@
 \section{Background}
 
-\remark{Does it make sense to have the background before the motivating examples? Should we maybe use this section to introduce triggers and views and after that we can use those in the motivating examples without explaining them again}
+In this section it is shown why the current access control mechanisms are flawed by contrasting the current access control mechanism in PostgreSQL with the new access control mechanism based on~\cite{guarnieri2016strong}.
+%
+\subsection{Current access control mechanism in PostgreSQL}
+%
+The access control mechanism used in PostgreSQL is a implementation of the access control model defined by the SQL standard.
+%
+This standard makes the assumption that information can only be leaked through \texttt{SELECT} queries issued to the DBMS.
+%
+The conclusions made in the following paragraphs are backed by a analysis of the backend code of PostgreSQL, since a proper documentation is missing.
+
+The basis for deciding if a command issued to the database by some user are \emph{access control lists} (ACLs). 
+%
+There is an ACL for each combination of user and object.
+%
+Each of those ACL is represented by a bitmask, where each bit represents one privilege.
+%
+These privileges can be modified using \texttt{GRANT} or \texttt{REVOKE} commands, whereas the execution of those is also based on the ACLs.
+%
+The possible privileges include insert, update, select, create, execute etc.\footnote{\url{http://www.postgresql.org/docs/9.5/static/sql-grant.html}}
+%
+Depending on the object different privileges are applicable.
+%
+When issuing a command to the database, depending on the query, a function is executed which, among other things, retrieves the ACL for the current object and checks if the required privileges are available for the user issuing the command.
+%
+This is actually where the mechanism is flawed.
+% 
+The one thing necessary to perform a command is the ACL for the object and current user.
+%
+The mechanism does not take into account other behaviour of the system, like triggers being executed or views being updated.
+%
+That is how the attacks in the previous sections succeed.
+%
+\subsection{New access control mechanism}
+%
+The approach taken in the access control mechanism based on the model proposed in\cite{guarnieri2016strong} is different.
+%
+The basis for creating an access control policy are still ACLs, but the basis for deciding if a command is allowed to be executed is the resulting behaviour of the database system.
+%
+In the case of a \texttt{SELECT} query, it is not only required that the user has read permissions on the tables referenced in the query.
+%
+As mentioned before the mechanism computes over- and underapproximations of the tuples returned by the query, further the query is deemed authorized if and only if the over- and underapproximation is equal.
+%
+The overapproximation must include all tuples that the user is requesting, but also includes all possible tuples revealed when executing the statement.
+%
+The underapproximation includes all tuples that do not leak any further information about the database than the information that the user is allowed to learn.
+%
+Therefore it is guaranteed that first, the user is served with all the tuples he has requested, and second that none of the returned tuples reveales more information about the database.

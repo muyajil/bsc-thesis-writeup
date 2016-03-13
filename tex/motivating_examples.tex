@@ -1,65 +1,81 @@
 \section{Motivating Examples}
 
-We show here how users can exploit advanced features of DBMSs to attack database integrity and confidentiality. 
+We show here how users can exploit advanced features of DBMSs to attack database confidentiality
 %
-The attacks are inspired by those presented in~\cite{guarnieri2016strong}.
+The following attacks were first presented in~\cite{guarnieri2016strong}
 %
-These attacks are classified in two families: \emph{Integrity attacks} and \emph{Confidentiality attacks}.
-%
-In the former, the attacker is able to make unauthorized changes to the database. %, thus violating the integrity of the database from a security point of view.
-%
-In the latter, the attacker manages to learn sensitive information from the database, that according to the security policy, should not be disclosed to the attacker.
+In these attacks, the attacker manages to learn sensitive information from the database, that according to the security policy, should not be disclosed to the attacker.
 %
 Guarnieri et al. have mounted these attacks manually against several widely used DBMS with shocking results: No existing access control mechanism is able to fully prevent these attacks.
 
-\remark{Is it worth introducing integrity attacks since in the thesis we deal just with confidentiality?}
-
-\subsection{Integrity Attacks}
-
-Here we present integrity attacks. 
-%
-The following attacks use \texttt{INSERT}, \texttt{DELETE}, \texttt{GRANT}, and \texttt{REVOKE} commands together with views and triggers, which are procedures automatically executed by the DBMS in response to user commands.
-
-In the first attack the attacker will use triggers to execute an unauthorized command on the database system. The trigger will be executed by an unaware user with a higher security clearance.
-
-\begin{attack}
-{\bf Trigger with activator's privileges:}
-Consider a database with two tables $P$ and $S$ and two users $u$ and $w$. The attacker is the user $u$ whose goal is to delete the contents of $S$. The policy is as follows: $u$ is not authorized to alter $S$, $u$ can create triggers on $P$, and $w$ can read and modify $S$ and $P$. The attack is as follows:
-\begin{enumerate}
-\item $u$ creates the following trigger:
-	\begin{verbatim}
-	CREATE TRIGGER t ON P AFTER INSERT
-    DELETE * FROM S
-	\end{verbatim}
-\item $u$ waits until $w$ insers a tuple into the table $P$. The trigger will then be invoked using $w$'s and $S$'s content will be deleted.
-\end{enumerate}
-\end{attack}
-\remark{Explain triggers with activator's privileges.}
-
-By replacing the \texttt{DELETE} command inside the trigger with a \texttt{GRANT} command an attacker can also escalate his privileges.
-
-In the second attack the attacker will use views to escalate his privileges. He will delegate read privileges, without having the necessary permissions on the origin table.
-
-\begin{attack}
-{\bf Grating views:}
-Consider a database with a table $S$ and two users $u$ and $v$, and the following policy: $u$ can create views and read $S$, but cannot delegate read permissions on $S$. $v$ cannot read $S$. The attacker is $u$ who will allow the unprivileged user $v$ to read the contents of $S$:
-\begin{enumerate}
-\item $u$ creates the view $V$:
-	\begin{verbatim}
-	CREATE VIEW V AS
-	SELECT * FROM S;
-	\end{verbatim}
-\item $u$ issues the command:
-	\begin{verbatim}
-	GRANT SELECT ON V TO v;
-	\end{verbatim}
-\end{enumerate}
-Now $v$ can read the contents of $S$ through $V$.
-\end{attack}
-
 \subsection{Confidentiality Attacks}
 
-In the following we will present confidentiality attacks.
+In the following we will present confidentiality attacks. 
+%
+We will use \texttt{SELECT} and \texttt{INSERT} commands in combination with triggers and integrity constraints to infer classified information.
+%
+According to~\cite{guarnieri2016strong} integrity constraints are invariants that must be satisfied for a database state to be considered \emph{valid}.
+%
+\emph{Integrity constraint violations} arise when the execution of an SQL command leads the database from a valid state into an invalid one.
+%
+\begin{attack}
+{\bf Table updates and integrity constraints.}
+%
+Consider a database with two tables $P$ and $S$. 
+%
+Suppose the primary key for both tables is the user's identifier.
+%
+Furthermore the set of user identifiers in $S$ is contained in the set of user identifiers in $P$, i.e., there is a foreign key from $S$ to $P$.
+%
+The attacker is user $u$, whose goal is to learn whether \texttt{Bob} is in $S$.
+%
+The access control policy is as follows: $u$ can read from $P$ and insert tuples into $S$.
 
+The attacker can learn whether \texttt{Bob} is in $S$ as follows:
+\begin{enumerate}
+	\item He reads $P$ and learns \texttt{Bob}'s identifier.
+	\item He issues an \texttt{INSERT} statement into $S$ using \texttt{Bob}'s id.
+	\item If \texttt{Bob} is already in $S$, then $u$ gets an error message about the primary key's violation. Alternatively there is no violation and $u$ learns that \texttt{Bob} is not in $S$.
+\end{enumerate}
+\end{attack}
+%
+In the next attack the attacker learns sensitive information by exploiting triggers.
+%
+The trigger is executed with owner's privileges, meaning it is executed with the same privileges as the user, which has created the trigger.
 
+\begin{attack}
+{\bf Triggers with owner's privileges.}
+%
+Consider a database with tables $P$, $T$, and $N$.
+%
+The attacker is user $u$, who wishes to learn whether $v$ is in $T$.
+%
+The policy is as follows:
+%
+$u$ is not authorized to read table $T$, and he can read and modify tables $P$ and $N$.
+%
+Moreover, the following trigger has been defined by the administrator:
+%
+\begin{verbatim}
+CREATE TRIGGER t on P AFTER INSERT FOR EACH ROW
+	IF EXISTS(SELECT * FROM T where id = new.id)
+		INSERT new.id INTO N;
+\end{verbatim}
+%
+The attack is as follows:
+%
+\begin{enumerate}
+	\item $u$ deletes $v$ from $N$.
+	\item $u$ issues the command:
+		\begin{verbatim}
+		INSERT INTO P VALUES(v).
+		\end{verbatim}
+	\item $u$ checks the table $N$. If it contains $v$'s id, then $v$ is in $T$. Otherwise $v$ is not in $T$.
+\end{enumerate}
+%
+\end{attack}
+%
+This attack leverages the fact that the trigger conditionally modifies the database.
+
+\remark{Should I say something more here or just leave it at that?}
 

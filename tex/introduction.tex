@@ -1,5 +1,5 @@
 \section{Introduction}
-When storing sensitive information in databases it is \emph{essential} to restrict access to it. \remark{It is unclear what ``it'' refers to. Alternative: something like ``To protect the confidentiality of sensitive information stored in databases, it is essential to restrict access to these data.''}
+To protect the confidentiality of sensitive information stored in databases, it is essential to restrict access to said data.
 %
 For this, the SQL standard defines an access control model, which has been implemented by commercial Database Management Systems (DBMSs). 
 %
@@ -7,96 +7,52 @@ This access control model successfully regulates \emph{direct access}, i.e., thr
 %
 Namely, attackers can exploit advanced database features, such as triggers and views, as well as the DBMS' semantics to infer sensitive information from sequences of authorized commands~\cite{guarnieri2016strong, ..., ..., ...}.
 %
-% REMOVE THIS
-%The mentioned attacks are possible due to the unrealistic security assumptions on which the SQL access control model relies, namely attackers can only infer information from \texttt{SELECT} queries' results without being able to infer information from other aspects of the system's behaviour.
-%
-
-
 
 Recently, Guarnieri et al.~\cite{guarnieri2016strong} investigated the limitations of the SQL access control model. 
 %
 They identified two families of attacks that attackers can carry out by exploiting advanced database features and the DBMS' semantics.
 %
-\remark{I guess the thesis will focus mostly on the confidentiality part. I don't think it's even worth to introduce integrity attacks at all.}
+One of those families are \emph{confidentiality attacks}. These allow an attacker to infer sensitive information based on the system's behaviour.
 %
-\emph{Integrity attacks} allow an attacker to perform non-authorized changes to the database, whereas \emph{confidentiality attacks} allow an attacker to learn sensitive information.
+They further developed a formal framework, consisting of formal database semantics and attacker model as well as precise security properties, to reason about the precise security guarantees offered by access control mechanisms in database systems.
 %
-They also developed a formal framework, consisting of formal database semantics and attacker model as well as precise security properties, to reason about the precise security guarantees offered by access control mechanisms in database systems.
-%
-Using this framework, they developed an open \remark{??} access control mechanism that provably prevents both integrity and confidentiality attacks.
+Using this framework, they developed an access control mechanism that provably prevents both families of attacks.
 
-\remark{We need a strong motivation. Why do we need the work in this thesis? How does it improve the state-of-the-art? Why should a database administrator read the thesis and use what we propose?}
-
-\remark{The third paragraph should clearly identify (1) the weaknesses and limitations of existing solutions (such as~\cite{guarnieri2016strong}), and (2) why they cannot be used in practice. This is \underline{the} paragraph where we say that everything is bad. Later we will show how this thesis saves the world.}
+Due to the gravity of the current situation, where the mentioned attacks can cause severe damage, this thesis explores the possibility of preventing confidentiality attacks in PostgreSQL, a widely used DBMS.
 
 The mechanism proposed by Guarnieri et al., has several limitations in practice.
 %
 For one the formulated model is based on the relational calculus. 
 %
-\remark{Existing Database Management Systems (DBMSs), however, are based on SQL.
+Existing Database Management Systems (DBMSs), however, are based on SQL.
 %
 Despite SQL is inspired by the relational calculus, it differs from it in significant ways.
 %
-Thus, extending Guarnieri et al.'s mechanism to SQL poses several challenges (WHICH ONES?), and it is crucial to effectively secure state-of-the-art DBMSs.
-}
-The reality, however is that DMBS\remark{Acronym never introduced before} are based on SQL, which differs from the relational algebra, and therefore posing several challenges for the implementation in a state-of-the-art DBMS.
-%
-Furthermore, due to the strong security requirements of the algorithm, a straight forward implementation would introduce an overhead of up to 200\%, thus the implementation needs to make use of heuristics to speed up the access control decision.
-%
-\remark{Do we have heuristics or better performances? Otherwise I don't know whether we should mention these points.}
-
-\remark{What are other limitations here? Until now I have only met these :)}
-
-\remark{Should I include other proposed solutions here? If yes which ones or where do I find those? See related work section of the paper}
+Thus, extending Guarnieri et al.'s mechanism to SQL poses several challenges, \remark{bag vs. set? for the confidentiality part we did not really have many problems right?}, and it is crucial to effectively secure state-of-the-art DBMSs.
 
 \smallskip
 \noindent
 {\bf Contributions.}
 %
-\remark{In this thesis, we extend  the access control mechanism proposed by Guarnieri et al.~\cite{} to SQL, and we integrate it inside PostgreSQL, a state-of-the-art open source DBMS.
+In this thesis, we extend  the access control mechanism proposed by Guarnieri et al.~\cite{guarnieri2016strong} to SQL, and we integrate it inside PostgreSQL
 %
-First, we refactor the original PostgreSQL's implementation to isolate and ... the access control mechanism.
+First, we refactor the original PostgreSQL's implementation to isolate the access control mechanism and provide a general interface for access requests, independent of the type of query.
 %
-The original implementation of PostgreSQL access control is not handled uniformly, depending on the type of query there are different functions deciding if a query is authorized or not. 
+The original implementation requires a deep understanding of the backend architecture of PostgreSQL to be able to extend and improve the current access control algorithm.
 %
-This makes modifications and changes to the access control mechanism extremely difficult, since the implementation of a new algorithm requires much more understanding of the backend architecture of PostgreSQL than actually need to implement and verify the algorithm.
-%
-Our refactoring provides the possibility of improving and extending access control without interfering with the internals of the DBMS. (Rephrase this).}
+Our refactoring provides the possibility of improving and extending access control without interfering with the internals of the DBMS.
 
-\remark{
 Second, we extend the access control mechanism proposed by Guarnieri et al.~\cite{guarnieri2016strong} to SQL.
 %
 This is essential to effectively secure PostgreSQL and prevent leakages of sensitive information.
 %
-In more detail, ... give some interesting bits about the algorithm.
+In more detail, we achieve this goal by computing over- and underapproximations of the tuples returned by a query. The query is only authorized iff the approximations contain the same set of tuples.
 %
+\remark{
 As shown in our experiments, our mechanism introduces an overhead, on average, of XX\%, in contrast to Guarnieri et al.'s mechanism  that  has an overhead of ...X\cite{guarnieri2016strong}.
+}
 %
 Furthermore, our algorithm is  more permissive than the PostgreSQL's mechanism, namely there are secure commands authorized by our solution and not authorized by PostgreSQL. etc.  
-}
-
-The original implementation of PostgreSQL access control is not handled uniformly, depending on the type of query there are different functions deciding if a query is authorized or not. 
-%
-Therefore the implementation of a new algorithm requires much more understanding of the backend architecture of PostgreSQL than actually need to implement and verify the algorithm.
-%
-The first contribution of this thesis is, that the codebase of PostgreSQL was refactored, moving all access control relevant code behind a uniform interface.
-%
-This provides the possibility of improving and extending access control without interfering with the internals of the DBMS.
-
-As mentioned above the framework proposed by Guarnieri et al. lacks support for SQL. 
-%
-As a second contribution, the rules building this framework were extended to the semantics of SQL, therefore allowing it to be implemented in a DBMS. \remark{The framework is operational semantics + attacker model + security notions. We don't cover these in the thesis.}
-
-Furthermore the algorithm has severe performance issues, another contribution of this thesis is to identify heuristics that can be used to increase the performance of this algorithm. \remark{Do we really do this?}
-
-
-%
-\remark{Here, you should list all the contributions of the thesis.
-%
-For each contribution, you should explain (1) why is it important and meaningful, and (2) how it improves the state-of-the-art.
-%
- Note that contributions $\neq$ list of things that you did. A contribution is something new that improves the state-of-the-art. After this section, the reader must be convinced that the work in this thesis is an important contribution to humanity :-)}
-
 
 \smallskip
 \noindent
@@ -104,7 +60,7 @@ For each contribution, you should explain (1) why is it important and meaningful
 %
 In the next chapter we will introduce some motivating examples of attacks from both families. 
 %
-In chapter 3 we will give background information about the advanced features that can be exploited. 
+In chapter 3 we will give background information to access control by comparing current access control mechanism to the model introduced in~\cite{guarnier2016strong}.
 %
 After that we will introduce the architecture of PostgreSQL and the new access control algorithm in chapter 4. 
 %
