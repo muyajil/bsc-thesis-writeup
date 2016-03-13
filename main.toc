@@ -5,6 +5,7 @@
 \contentsline {subsection}{\numberline {3.1}Current access control mechanism in PostgreSQL}{6}{subsection.3.1}
 \contentsline {subsection}{\numberline {3.2}New access control mechanism}{6}{subsection.3.2}
 \contentsline {section}{\numberline {4}Architecture}{8}{section.4}
+\contentsline {subsection}{\numberline {4.1}Current architecture}{8}{subsection.4.1}
 \contentsline {section}{\numberline {5}Algorithms}{9}{section.5}
 \contentsline {section}{\numberline {6}Experiments}{10}{section.6}
 \contentsline {section}{\numberline {7}Related Work}{11}{section.7}
