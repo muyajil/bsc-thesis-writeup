@@ -28,7 +28,7 @@ This is actually where the mechanism is flawed.
 % 
 The one thing necessary to perform a command is the ACL for the object and current user.
 %
-The mechanism does not take into account other behaviour of the system, like triggers being executed or views being updated.
+The mechanism does not take into account other behaviour of the system, like triggers being executed or views being updated, or previous \texttt{GRANT}s being revoked.
 %
 That is how the attacks in the previous sections succeed.
 %
@@ -47,3 +47,15 @@ The overapproximation must include all tuples that the user is requesting, but a
 The underapproximation includes all tuples that do not leak any further information about the database than the information that the user is allowed to learn.
 %
 Therefore it is guaranteed that first, the user is served with all the tuples he has requested, and second that none of the returned tuples reveales more information about the database.
+
+\remark{I don't know if we should include the next paragraph, imo it somehow shows the severity of the situation, but also it concerns the integrity and confidentiality part. It is not included in the algorithm, but still a good example. What do you think?}
+
+In the case of a \texttt{GRANT} command, the current access control mechanism authorizes a query if either the user owns the object, or the user was given a privilege together with a so called "grant option", which allows the user to delegate this privilege to other users.
+%
+A possible scenario however would be that a user $a$ received a \texttt{GRANT SELECT WITH GRANT OPTION} from the administrator and after that delegated this to a third user $b$.
+%
+If in this scenario the administrator revokes the \texttt{SELECT} privilege from user $a$, because $a$ has lost his trust, there is no mechanism that prevents user $b$ from keeping his \texttt{SELECT} privilege.
+%
+This is problematic, since $a$ and $b$ could be colluding users, and user $b$ could, with his grant option, issue a \texttt{GRANT} command that returns these privileges to user $a$.
+%
+In the new access control mechanism such a situation is prevented, by not only checking the privileges of user $a$ when issuing a \texttt{GRANT} statement, but also checking if the chain that led to this \texttt{GRANT} is well-formed, i.e., is a verifiable chain of still active \texttt{GRANT}s.

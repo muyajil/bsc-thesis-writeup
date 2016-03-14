@@ -5,7 +5,7 @@ For this, the SQL standard defines an access control model, which has been imple
 %
 This access control model successfully regulates \emph{direct access}, i.e., through \texttt{SELECT} queries, to the data. It however falls far short of preventing \emph{indirect access} to sensitive data.
 %
-Namely, attackers can exploit advanced database features, such as triggers and views, as well as the DBMS' semantics to infer sensitive information from sequences of authorized commands~\cite{guarnieri2016strong, ..., ..., ...}.
+Namely, attackers can exploit advanced database features, such as triggers and views, as well as the DBMS' semantics to infer sensitive information from sequences of authorized commands~\cite{guarnieri2016strong}.
 %
 
 Recently, Guarnieri et al.~\cite{guarnieri2016strong} investigated the limitations of the SQL access control model. 
@@ -60,7 +60,7 @@ Furthermore, our algorithm is  more permissive than the PostgreSQL's mechanism, 
 %
 In the next chapter we will introduce some motivating examples of attacks from both families. 
 %
-In chapter 3 we will give background information to access control by comparing current access control mechanism to the model introduced in~\cite{guarnier2016strong}.
+In chapter 3 we will give background information to access control by comparing current access control mechanism to the model introduced in~\cite{guarnieri2016strong}.
 %
 After that we will introduce the architecture of PostgreSQL and the new access control algorithm in chapter 4. 
 %
