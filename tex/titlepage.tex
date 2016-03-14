@@ -1,0 +1,34 @@
+%% Titlepage adjustments
+\pretitle{\vspace{0pt plus 0.7fill}\begin{center}\HUGE\sffamily\bfseries}
+\posttitle{\end{center}\par}
+\preauthor{\par\begin{center}\let\and\\\Large\sffamily}
+\postauthor{\end{center}}
+\predate{\par\begin{center}\Large\sffamily}
+\postdate{\end{center}}
+
+\def\@advisors{}
+\newcommand{\advisors}[1]{\def\@advisors{#1}}
+\def\@department{}
+\newcommand{\department}[1]{\def\@department{#1}}
+\def\@thesistype{}
+\newcommand{\thesistype}[1]{\def\@thesistype{#1}}
+
+\renewcommand{\maketitlehooka}{\noindent\ETHlogo[2in]}
+
+\renewcommand{\maketitlehookb}{\vspace{1in}%
+  \par\begin{center}\Large\sffamily\@thesistype\end{center}}
+
+\renewcommand{\maketitlehookd}{%
+  \vfill\par
+  \begin{flushright}
+    \sffamily
+    \@advisors\par
+    \@department, ETH Z\"urich
+  \end{flushright}
+}
+
+\checkandfixthelayout
+
+\setlength{\droptitle}{-48pt}
+
+\makeatother
