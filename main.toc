@@ -12,4 +12,4 @@
 \contentsline {section}{\numberline {7}Related Work}{12}{section.7}
 \contentsline {section}{\numberline {8}Conclusion}{13}{section.8}
 \contentsline {section}{\numberline {A}Appendix}{14}{appendix.A}
-\contentsline {section}{Bibliography}{15}{appendix.A}
+\contentsline {section}{References}{15}{appendix.A}
