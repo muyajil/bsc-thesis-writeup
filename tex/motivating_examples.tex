@@ -19,7 +19,7 @@ According to~\cite{guarnieri2016strong} integrity constraints are invariants tha
 \emph{Integrity constraint violations} arise when the execution of an SQL command leads the database from a valid state into an invalid one.
 %
 \begin{attack}
-{\bf Table updates and integrity constraints.}
+{\bf Table updates and integrity constraints.~\cite{guarnieri2016strong}}
 %
 Consider a database with two tables $P$ and $S$. 
 %
@@ -39,12 +39,18 @@ The attacker can learn whether \texttt{Bob} is in $S$ as follows:
 \end{enumerate}
 \end{attack}
 %
+The first step of this attack includes a \texttt{SELECT} statement to the database, from which the attacker knows that it does not change the database state.
+%
+The second step is actually the key of this attack, from the information the attacker has learned from the first step, he can issue the second step at any point in time.
+%
+Everytime the above \texttt{INSERT} command is issued, the attacker learns whether \texttt{Bob} is in the table $S$ in the database state that directly precedes the transaction containing the \texttt{INSERT} command.
+%
 In the next attack the attacker learns sensitive information by exploiting triggers.
 %
 The trigger is executed with owner's privileges, meaning it is executed with the same privileges as the user, which has created the trigger.
 
 \begin{attack}
-{\bf Triggers with owner's privileges.}
+{\bf Triggers with owner's privileges.~\cite{guarnieri2016strong}}
 %
 Consider a database with tables $P$, $T$, and $N$.
 %
@@ -66,16 +72,19 @@ The attack is as follows:
 %
 \begin{enumerate}
 	\item $u$ deletes $v$ from $N$.
-	\item $u$ issues the command:
-		\begin{verbatim}
-		INSERT INTO P VALUES(v).
-		\end{verbatim}
+	\item $u$ issues the command: \texttt{INSERT INTO P VALUES(v)}
 	\item $u$ checks the table $N$. If it contains $v$'s id, then $v$ is in $T$. Otherwise $v$ is not in $T$.
 \end{enumerate}
 %
 \end{attack}
 %
-This attack leverages the fact that the trigger conditionally modifies the database.
+In the first step the attacker issues a \texttt{DELETE} statement, from which he learns that $v$ cannot be in the table $N$ in the database state directly subsequent to the \texttt{DELETE} statement.
+%
+The attacker knows about the trigger in the database, and therefore can reason, that the trigger is always executed after an \texttt{INSERT} statement on table $P$.
+%
+He further knows, that the trigger is executed in the same transaction as the \texttt{INSERT} statement, therefore after issuing the \texttt{INSERT} into table $P$ it is not possible that another \texttt{INSERT} into $N$ is executed first.
+%
+Therefore the attacker knows, that if $v$ is not in $N$ in the database state where he issues the \texttt{INSERT} statement, $v$ is inserted into $N$ if and only if $v$ is already in $T$.
 
-\remark{Should I say something more here or just leave it at that?}
+\remark{What if between the delete and insert there is a command \texttt{INSERT INTO N VALUES(v)}?}
 

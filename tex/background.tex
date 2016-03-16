@@ -4,58 +4,52 @@ In this section it is shown why the current access control mechanisms are flawed
 %
 \subsection{Current access control mechanism in PostgreSQL}
 %
-The access control mechanism used in PostgreSQL is a implementation of the access control model defined by the SQL standard.
+The access control mechanism used in PostgreSQL is to large extent an implementation of the access control model defined by the SQL standard.
 %
 This standard makes the assumption that information can only be leaked through \texttt{SELECT} queries issued to the DBMS.
 %
-The conclusions made in the following paragraphs are backed by a analysis of the backend code of PostgreSQL, since a proper documentation of the internals is missing.
+The conclusions made in the following paragraphs are backed by an analysis of the backend code of PostgreSQL, since a proper documentation of the internals is missing.
 
-The basis for deciding if a command issued to the database by some user are \emph{access control lists} (ACLs). 
+The administrator has to define an access control policy for the database.
 %
-There is an ACL for each combination of user and object.
+This policy defines how users can interact with the system.
 %
-Each of those ACL is represented by a bitmask, where each bit represents one privilege.
+A database object can refer to any structure within a database: tables, views, triggers, functions etc.
+%
+For each object the administrator has to define \emph{access control lists} (ACLs) for each database role.
+%
+The administrator can define an ACL for the public, a group or a user. 
+%
+These ACLs then define the privileges to a database object for a database role.
+%
+The privileges among others include creation of tables, views or triggers in the database or reading, altering or deleting of tuples from tables or views.
 %
 These privileges can be modified using \texttt{GRANT} or \texttt{REVOKE} commands, whereas the execution of those is also based on the ACLs.
 %
 The possible privileges include insert, update, select, create, execute etc.\footnote{\url{http://www.postgresql.org/docs/9.5/static/sql-grant.html}}
 %
-Depending on the object different privileges are applicable.
+Depending on the object different privileges are applicable. For example the execution privilege is only applicable to functions and triggers, whereas the insert privilege is only applicable to tables or views.
 %
-When issuing a command to the database, depending on the query, a function is executed which, among other things, retrieves the ACL for the current object and checks if the required privileges are available for the user issuing the command.
+When issuing a query to the database, depending on the query, a function is executed which, among other things, retrieves the ACL for the objects referenced in the query and checks if the required privileges are available for the user issuing the command.
 %
-This is actually where the mechanism is flawed.
-% 
-The one thing necessary to perform a command is the ACL for the object and current user.
+When deciding if a \texttt{SELECT} query is authorized, we can distinguish two cases: 
 %
-The mechanism does not take into account other behaviour of the system, like triggers being executed or views being updated, or previous \texttt{GRANT}s being revoked.
+In the first case the user issuing the query has read privileges on all the relations in the \texttt{FROM} clause of the query, then security is trivial and we can allow the query. 
 %
-That is how the attacks in the previous sections succeed.
+In the second case the user does not have read privileges on all the tables in the \texttt{FROM} clause of the query. 
+%
+The current access control mechanism will not authorize this query.
+%
+The access control mechanism implemented in PostgreSQL does not take into account other aspects of the database system, i.e., in the case of an \texttt{INSERT} query there is no check if the execution of triggers might reveal information to an attacker.
+%
+The attacks in the previous section succeed because of this behaviour.
+%
+\remark{What should I add here? I could explain the process that happens for a \texttt{SELECT} in detail here, it will sound complicated but boil down to comparing bits in the ACL, what do you think?}
 %
 \subsection{New access control mechanism}
 %
-The approach taken in the access control mechanism based on the model proposed in\cite{guarnieri2016strong} is different.
+The approach taken in the access control mechanism based on the model proposed in~\cite{guarnieri2016strong} is different.
 %
 The basis for creating an access control policy are still ACLs, but the basis for deciding if a command is allowed to be executed is the resulting behaviour of the database system.
-%
-In the case of a \texttt{SELECT} query, it is not only required that the user has read permissions on the tables referenced in the query.
-%
-As mentioned before the mechanism computes over- and underapproximations of the tuples returned by the query, further the query is deemed authorized if and only if the over- and underapproximation is equal.
-%
-The overapproximation must include all tuples that the user is requesting, but also includes all possible tuples revealed when executing the statement.
-%
-The underapproximation includes all tuples that do not leak any further information about the database than the information that the user is allowed to learn.
-%
-Therefore it is guaranteed that first, the user is served with all the tuples he has requested, and second that none of the returned tuples reveales more information about the database.
 
-\remark{I don't know if we should include the next paragraph, imo it somehow shows the severity of the situation, but also it concerns the integrity and confidentiality part. It is not included in the algorithm, but still a good example. What do you think?}
-
-In the case of a \texttt{GRANT} command, the current access control mechanism authorizes a query if either the user owns the object, or the user was given a privilege together with a so called "grant option", which allows the user to delegate this privilege to other users.
-%
-A possible scenario however would be that a user $a$ received a \texttt{GRANT SELECT WITH GRANT OPTION} from the administrator and after that delegated this to a third user $b$.
-%
-If in this scenario the administrator revokes the \texttt{SELECT} privilege from user $a$, because $a$ has lost his trust, there is no mechanism that prevents user $b$ from keeping his \texttt{SELECT} privilege.
-%
-This is problematic, since $a$ and $b$ could be colluding users, and user $b$ could, with his grant option, issue a \texttt{GRANT} command that returns these privileges to user $a$.
-%
-In the new access control mechanism such a situation is prevented, by not only checking the privileges of user $a$ when issuing a \texttt{GRANT} statement, but also checking if the chain that led to this \texttt{GRANT} is well-formed, i.e., is a verifiable chain of still active \texttt{GRANT}s.
+\remark{Can we talk about how to continue here? I think this is a bit unclear to me and to the reader. As you mentioned we need a good example here that can explain the situation}
