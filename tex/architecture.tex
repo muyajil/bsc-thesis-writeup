@@ -5,37 +5,40 @@ This section introduces the architecture of the currently distributed version of
 Furthermore it is shown how the architecture looks after the refactoring and implementation of the new algorithm.
 %
 \subsection{Current architecture}
+
+\remark{This is one HUGE paragraph. Split it :-)}
+
 %
-In the current version of PostgreSQL the access control module is not identifiable as own module in the backend code of the DBMS.
+In the current version of PostgreSQL the access control module is not identifiable as \remark{a stand-alone?} module in the backend code of the DBMS.
 %
-The following figure shows a flowchart of the backend of PostgreSQL.
+\remark{Figure~\ref{figure:postgresql:architecture}} shows a flowchart of the backend of PostgreSQL. \remark{The flowchart shows backend's behaviour. The backend is just a bunch of code. It's static and has no ``flow''.}
 %
-It is shown that there are two general types of queries: \emph{utility commands} and \emph{non-utility commands}.
+It is shown that there are two general types of queries: \emph{utility commands} and \emph{non-utility commands}. \remark{Get rid of ``It is shown that''. Be concise and avoid needless words! There are two types of commands or queries? Pick a terminology and stick to it.}
 %
-Utility commands include all commands that modify the structure of the database, i.e., add a new table or view, create a trigger, or modify ACLs for example.
+Utility commands include all commands that modify the structure of the database, i.e., adding a new table or view, creating a new trigger, or modifying the access control policy  for example. \remark{You're giving examples so you should use ``e.g.''. This is latin and stands for \emph{exempli gratia}, which can be roughly translated as ``for example''. For this reason, you don't need the ``for example'' at the end.}
 %
-Non-utility commands on the other hand, modify the data in the underlying database structure, i.e., add tuples, update tuples or delete tuples for example.
+Non-utility commands on the other hand, modify the data in the underlying database structure, i.e., add tuples, update tuples or delete tuples for example. \remark{Here, ``e.g.'' instead of ``i.e.'' again. However, ``such as'' sounds better and avoid repetitions.}
 %
-The main difference between those is that the utility commands are generally \emph{non-optimizable}.
+The main difference between those\remark{Replace with ``the former and the latter''} is that utility commands are, in general, \emph{non-optimizable}. \remark{Undefined? True?}
 %
-That means it makes no sense to pass them through the query rewriter or optimizer, since there is generally no room for optmization.
+That means it makes no sense to pass them through the query rewriter or optimizer, since there is generally no room for optimization. \remark{Pass through sounds terrible :-)} 
 %
 Non-utility commands however are passed through several stages of the backend, where they are rewritten, plans are generated, the optimal plan is chosen and finally the optimal plan is executed.
 %
-As mentioned before there is no interface that allows these different stages of the backend to request a access control decision.
+As mentioned before there is no interface that allows these different stages of the backend to request a access control decision \remark{This is a bit unclear. This must be one of the key points of this section.}.
 %
-Therefore the decision if a query is authorized or not is usually done inside the so called traffic cop, which, as the name indicates, moderates the incoming queries to the correct modules.
+Therefore the decision if a query is authorized or not is usually done inside the so-called traffic cop, which, as the name indicates, moderates \remark{wrong verb? forwards?} the incoming queries to the correct modules.
 %
-Inside the traffic cop however it depends again on the exact type of the query, i.e., if the query is a \texttt{SELECT}, \texttt{INSERT} or other type, how the decision is made.
+Inside the traffic cop however it depends again on the exact type of the query, i.e., if the query is a \texttt{SELECT}, \texttt{INSERT} or other type, how the decision is made. \remark{E.g.,}
 %
-Due to this the access control mechanism in the current version of PostgreSQL is deeply connected with the internals of the backend, because the functions usually do not only retrieve the ACL, but prepare the system catalogs, the tables that contain the database structure, for the upcoming change.
+Due to this\remark{This what?}\remark{,} the access control mechanism in the current version of PostgreSQL is deeply connected with the internals of the backend, because the functions usually do not only retrieve the ACL, but prepare the system catalogs and the tables that contain the database structure, for the upcoming change. \remark{The last two sentences are completely obscure.}
 %
 Sometimes however, such as in the case of a \texttt{CREATE TRIGGER} command, the decision is made in the course of creating the trigger, i.e., there is no external function called that makes the decision.
 %
 \begin{figure}[!ht]
   \centering
     \includegraphics[width=1\textwidth]{img/backend_flowchart.png}
-    \caption{Backend Flowchart PostgreSQL \protect \footnotemark}
+    \caption{Backend Flowchart PostgreSQL \protect \footnotemark}\label{figure:postgresql:architecture}
 \end{figure}
 %
 \footnotetext{\url{http://www.postgresql.org/developer/backend}}
@@ -53,6 +56,18 @@ The building of a uniform interface however introduced several engineering chall
 Depending on the function the type of the return value is different. Also some code that was moved to the external module was not a function, but part of a function without a return value.
 %
 \remark{I find it difficult to add more content here, should I describe specific examples? It is the thing that took most of the time...}
+
+
+\remark{
+Here you should:
+%
+1) describe the rationale behind our architectural choices,
+%
+2) describe the interface, and 
+%
+3) give some interesting information on the implementation.
+}
+
 %
 After the process of refactoring it is possible to integrate any access control mechanism as a plug-in.
 %
