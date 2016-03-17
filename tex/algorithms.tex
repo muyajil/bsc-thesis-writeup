@@ -1,1 +1,163 @@
 \section{Algorithms}
+
+\subsection{Query Containment}
+
+The subject of query containment refers to the problem where for two queries $Q_1$ and $Q_2$ we want to answer if $Q_1$ is contained in $Q_2$ in all indistinguishable database states.
+%
+\remark{introduce indistinguishability of database states}
+%
+\remark{maybe reference to book for NP hardness} 
+
+\subsection{Query Containment Approximation}
+
+Since the decision of query containment is \emph{NP-hard}, i.e., not decidable in polynomial time, Guarnieri et al. have developed a rule set that over- respectively underapproximates the containment.
+%
+The rules were developed for the relational algebra, which as mentioned before differs from SQL. 
+%
+Thus during the thesis these rules were extended to support SQL.
+%
+In the following we will present the rule set for SQL. 
+%
+Let $T_i$ denote tables, $A_i$ sets of attributes within tables, $Q_i$ complete \texttt{SELECT} queries, and greek letters stand for boolean expressions.
+\newline
+{\renewcommand{\arraystretch}{1.5}
+\begin{center}
+	\begin{tabular}{ p{5mm} p{40mm} p{5mm} p{25mm} p{25mm} }
+	(1) \label{id} &
+	\texttt{SELECT $A_1$} \newline
+	\texttt{FROM $T_1$} \newline
+	\texttt{WHERE $\phi$} &
+	$\subseteq$ &
+	\texttt{SELECT $A_1$} \newline
+	\texttt{FROM $T_1$} \newline
+	\texttt{WHERE $\phi$}&
+	\\
+
+	(2) \label{and} &
+	\texttt{SELECT $A_1$} \newline
+	\texttt{FROM $T_1$} \newline
+	\texttt{WHERE $\phi \land \psi$} &
+	$\subseteq$ &
+	\texttt{SELECT $A_1$} \newline
+	\texttt{FROM $T_1$} \newline
+	\texttt{WHERE $\phi$}&
+	\\
+	
+	(3) \label{or} &
+	\texttt{SELECT $A_1$} \newline
+	\texttt{FROM $T_1$} \newline
+	\texttt{WHERE $\phi$} &
+	$\subseteq$ &
+	\texttt{SELECT $A_1$} \newline
+	\texttt{FROM $T_1$} \newline
+	\texttt{WHERE $\phi \lor \psi$}&
+	\\
+	
+	(4) \label{proj} &
+	\texttt{SELECT $A_1$} \newline
+	\texttt{FROM $T_1$} \newline
+	\texttt{WHERE $\phi$} &
+	$\subseteq$ &
+	\texttt{SELECT $A_2$} \newline
+	\texttt{FROM $T_1$} \newline
+	\texttt{WHERE $\phi$}&
+	if $A_1 \subseteq A_2$
+	\\
+	
+	(5) \label{proj2} &
+	\texttt{SELECT $A_1$} \newline
+	\texttt{FROM $T_1$} \newline
+	\texttt{WHERE $\phi$} &
+	$\subseteq$ &
+	\texttt{SELECT $A_2$} \newline
+	\texttt{FROM $T_2$} \newline
+	\texttt{WHERE $\phi$}&
+	if $A_1 \subseteq A_2 \land T_1 \subseteq T_2$
+	\\
+	
+	(6) \label{intersect1} &
+	$Q_1$ \texttt{INTERSECTION} $Q_2$ &
+	$\subseteq$ &
+	$Q_1$&
+	\\
+	
+	(7) \label{intersect2} &
+	$Q_1$ \texttt{INTERSECTION} $Q_2$ &
+	$\subseteq$ &
+	$Q_2$&
+	\\
+	
+	(8) \label{union1} &
+	$Q_1$&
+	$\subseteq$ &
+	$Q_1$ \texttt{UNION} $Q_2$ &
+	\\
+	
+	(8) \label{union2} &
+	$Q_2$&
+	$\subseteq$ &
+	$Q_1$ \texttt{UNION} $Q_2$ &
+	\\
+	
+	(9) \label{except} &
+	$Q_1$ \texttt{EXCEPT} $Q_2$ &
+	$\subseteq$ &
+	$Q_1$&
+	\\
+	\end{tabular}
+\end{center}
+
+During this thesis a subset of the rules above were implemented.
+
+\subsection{Authorization of \texttt{SELECT} queries}
+
+In the example previously introduced in chapter 3, we showed that the current access control mechanism implemented in PostgreSQL is more restrictive than the mechanism implemented for this thesis.
+%
+The new mechanism relies on the concept of query containment.
+%
+For each \texttt{SELECT} query $Q$ issued by some user $u$ we do the following:
+%
+First we compute the overapproximation of the query using the query containment rules.
+%
+For each table or view $T$ referenced in the \texttt{SELECT} query, we compute the set $T^\bot$ that contains all tables or views that contain $T$.
+%
+After that we rewrite the original query $Q$ by replacing each referenced table or view with the intersection of all tables or views $\in T^\bot$ that, according to the access control policy, are readable to the user $u$.
+%
+This query is then submitted to the database and obtain the set of resulting tuples $Q^\bot$.
+%
+For the underapproximation we will, for each referenced table or view $T$, compute the set $T^\top$ containing all tables or views that are contained in $T$.
+%
+Then we will rewrite the original query $Q$ by replacing each referenced table or view with the union of all the tables or views $\in T^\top$ that, according to the access control policy, are readable to the user $u$.
+%
+After that we obtain the set of resulting tuples $Q^\top$.
+%
+The original query $Q$ is authorized if $Q^\top = Q^\bot$.
+
+\smallskip
+\noindent
+{\bf Example:}
+Recall the database setup with the following objects:
+%
+\begin{itemize}
+	\item A table \texttt{Employees} containing all employees.
+	\item A view \texttt{Programmers} defined by:
+		\begin{verbatim}
+		SELECT * 
+		FROM Employees
+		WHERE Job = "Programmer"
+		\end{verbatim}
+	\item A view \texttt{Oldprogrammers} defined by:
+		\begin{verbatim}
+		SELECT *
+		FROM Programmers
+		WHERE Age > 40
+		\end{verbatim}
+\end{itemize}
+%
+Further we have a user $u$ which has read access to the tables \texttt{Employees} and \texttt{Oldprogrammers}.
+%
+$u$ issues the following query $Q := $ \texttt{SELECT * FROM Programmers}, which by the current mechanism will not be authorized.
+%
+According to the rules above, specifically (2), we can deduce that \texttt{Programmers} $\subseteq$ \texttt{Employees} and \texttt{Oldprogrammers} $\subseteq$ \texttt{Programmers}.
+%
+\remark{I think we must include the table the user selects from, even if it is not authorized by the ACL, otherwise the example won't work...}
