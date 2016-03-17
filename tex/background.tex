@@ -2,8 +2,6 @@
 
 In this section it is shown why the current access control mechanisms are flawed by contrasting the current access control mechanism in PostgreSQL with the new access control mechanism based on~\cite{guarnieri2016strong}.
 %
-\subsection{Current access control mechanism in PostgreSQL}
-%
 The access control mechanism used in PostgreSQL is to large extent an implementation of the access control model defined by the SQL standard.
 %
 This standard makes the assumption that information can only be leaked through \texttt{SELECT} queries issued to the DBMS.
@@ -28,28 +26,52 @@ These privileges can be modified using \texttt{GRANT} or \texttt{REVOKE} command
 %
 The possible privileges include insert, update, select, create, execute etc.\footnote{\url{http://www.postgresql.org/docs/9.5/static/sql-grant.html}}
 %
-Depending on the object different privileges are applicable. For example the execution privilege is only applicable to functions and triggers, whereas the insert privilege is only applicable to tables or views.
+Depending on the object different privileges are applicable. 
+%
+For example the execution privilege is only applicable to functions and triggers, whereas the insert privilege is only applicable to tables or views.
 %
 When issuing a query to the database, depending on the query, a function is executed which, among other things, retrieves the ACL for the objects referenced in the query and checks if the required privileges are available for the user issuing the command.
-%
-When deciding if a \texttt{SELECT} query is authorized, we can distinguish two cases: 
-%
-In the first case the user issuing the query has read privileges on all the relations in the \texttt{FROM} clause of the query, then security is trivial and we can allow the query. 
-%
-In the second case the user does not have read privileges on all the tables in the \texttt{FROM} clause of the query. 
-%
-The current access control mechanism will not authorize this query.
-%
-The access control mechanism implemented in PostgreSQL does not take into account other aspects of the database system, i.e., in the case of an \texttt{INSERT} query there is no check if the execution of triggers might reveal information to an attacker.
-%
-The attacks in the previous section succeed because of this behaviour.
-%
-\remark{What should I add here? I could explain the process that happens for a \texttt{SELECT} in detail here, it will sound complicated but boil down to comparing bits in the ACL, what do you think?}
-%
-\subsection{New access control mechanism}
-%
-The approach taken in the access control mechanism based on the model proposed in~\cite{guarnieri2016strong} is different.
-%
-The basis for creating an access control policy are still ACLs, but the basis for deciding if a command is allowed to be executed is the resulting behaviour of the database system.
 
-\remark{Can we talk about how to continue here? I think this is a bit unclear to me and to the reader. As you mentioned we need a good example here that can explain the situation}
+\smallskip
+\noindent
+{\bf Example:}
+%
+Consider a database with the following objects:
+%
+\begin{itemize}
+	\item A table \texttt{Employees} containing all employees.
+	\item A view \texttt{Programmers} defined by:
+		\begin{verbatim}
+		SELECT * 
+		FROM Employees
+		WHERE Job = "Programmer"
+		\end{verbatim}
+	\item A view \texttt{Oldprogrammers} defined by:
+		\begin{verbatim}
+		SELECT *
+		FROM Programmers
+		WHERE Age > 40
+		\end{verbatim}
+\end{itemize}
+%
+Assume that user $u$ is allowed to read all three objects. When $u$ issues the query $Q_1 := $ \texttt{SELECT * FROM Programmers}. 
+%
+The current access control mechanism will retrieve the ACL for \texttt{Programmers} and check if user $u$ has read access to \texttt{Programmers}. 
+%
+Since this is the case the query will be authorized.
+%
+The new mechanism implemented during this thesis will also authorize this query.
+%
+Now assume that user $u$ is allowed to read \texttt{Oldprogrammers} and \texttt{Employees}, but not allowed to read \texttt{Programmers}.
+%
+The current mechanism will not authorize this query, since the ACL of \texttt{Programmers} does not include read privileges for user $u$.
+%
+But since $u$ has access to the table \texttt{Employees}, $u$ can issue the query $Q_2 := $ \texttt{SELECT * FROM Employees WHERE Job="Programmer"}.
+%
+This query however will be authorized by the current mechanism and yield the same results than $Q_1$.
+%
+The new access control mechanism will detect this behaviour of the system and authorize $Q_1$.
+%
+Therefore the new mechanism is more permissive than the old one.
+%
+In chapter 5 we will return to this example and explain how.
