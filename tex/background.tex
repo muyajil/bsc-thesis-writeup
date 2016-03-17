@@ -1,28 +1,30 @@
-\section{Background}\label{background}
+\section{Background}
 
 In this section it is shown why the current access control mechanisms are flawed by contrasting the current access control mechanism in PostgreSQL with the new access control mechanism based on~\cite{guarnieri2016strong}.
 %
-The access control mechanism used in PostgreSQL is to large extent an implementation of the access control model defined by the SQL standard.
+The access control mechanism used in PostgreSQL is to a large extent an implementation of the access control model defined by the SQL standard.
 %
-This standard makes the assumption that information can only be leaked through \texttt{SELECT} queries issued to the DBMS.
+This standard makes the assumption that information can only be leaked through \texttt{SELECT} queries issued to the DBMS. \remark{Too strong. There is no such explicit assumption. Rather, the assumption is ``implicit'' and clear if you look at how the handle things.}
 %
 The conclusions made in the following paragraphs are backed by an analysis of the backend code of PostgreSQL, since a proper documentation of the internals is missing.
 
-The administrator has to define an access control policy for the database.
+\remark{I'd first start by outlining the SQL access control model. There are privileges. Privileges are assigned/revoked using \texttt{GRANT} and \texttt{REVOKE} commands. This kind of things :-) This is essential to understand the rest (e.g., what are ACLs? how are they defined? what are the roles?)}
+
+The administrator has to define an access control policy for the database. 
 %
 This policy defines how users can interact with the system.
 %
-A database object can refer to any structure within a database: tables, views, triggers, functions etc.
+A database object \remark{What is a db. object?} can refer to any structure within a database: tables, views, triggers, functions etc.
 %
 For each object the administrator has to define \emph{access control lists} (ACLs) for each database role.
 %
-The administrator can define an ACL for the public, a group or a user. 
+The administrator can define an ACL for the public, a group\remark{,} or a user. 
 %
 These ACLs then define the privileges to a database object for a database role.
 %
 The privileges among others include creation of tables, views or triggers in the database or reading, altering or deleting of tuples from tables or views.
 %
-These privileges can be modified using \texttt{GRANT} or \texttt{REVOKE} commands, whereas the execution of those is also based on the ACLs.
+These privileges can be modified using \texttt{GRANT} or \texttt{REVOKE} commands, whereas the execution of those is also based on the ACLs \remark{the last part is a bit unclear}.
 %
 The possible privileges include insert, update, select, create, execute etc.\footnote{\url{http://www.postgresql.org/docs/9.5/static/sql-grant.html}}
 %
@@ -75,3 +77,5 @@ The new access control mechanism will detect this behaviour of the system and au
 Therefore the new mechanism is more permissive than the old one.
 %
 In chapter 5 we will return to this example and explain how.
+
+\remark{I like the example. It has to be polished and clarified a bit though. Moving it to motivating examples?}
