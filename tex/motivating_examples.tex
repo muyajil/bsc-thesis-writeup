@@ -1,5 +1,8 @@
 \section{Motivating Examples}
 
+
+\remark{Do we still need these motivating examples with the new story? I'd rather add a few examples illustrating that the SQL access control mechanism for SELECTs is too restrictive and how it impacts the algorithm in~\cite{guarnieri2016strong}. Then, we can even illustrate (only using a very high level example) how our solution will work.}
+
 We show here how users can exploit advanced features of DBMSs to attack database confidentiality
 %
 The following attacks were first presented in~\cite{guarnieri2016strong}
@@ -86,5 +89,5 @@ He further knows, that the trigger is executed in the same transaction as the \t
 %
 Therefore the attacker knows, that if $v$ is not in $N$ in the database state where he issues the \texttt{INSERT} statement, $v$ is inserted into $N$ if and only if $v$ is already in $T$.
 
-\remark{What if between the delete and insert there is a command \texttt{INSERT INTO N VALUES(v)}?}
+\remark{What if between the delete and insert there is a command \texttt{INSERT INTO N VALUES(v)}? ANSWER: This attacker has to be sure that all the steps are executed consecutively without interferences from other users. There is a brief discussion about it in the paper (in the attacker model).}
 
