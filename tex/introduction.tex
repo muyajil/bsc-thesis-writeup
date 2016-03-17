@@ -1,5 +1,5 @@
 \section{Introduction}
-To protect the confidentiality of sensitive information stored in databases, it is essential to restrict access to the stated data.
+To protect the confidentiality of sensitive information stored in databases, it is essential to restrict access to the stored data.
 %
 For this, the SQL standard defines an access control model. And existing Database Management Systems (DBMSs) have implemented it. 
 %
@@ -10,15 +10,15 @@ Namely, attackers can exploit advanced database features, such as triggers and v
 
 Recently, Guarnieri et al.~\cite{guarnieri2016strong} investigated the limitations of the SQL access control model. 
 %
-They identified severe of attacks. Attackers can carry out by exploiting advanced database features and the DBMS' semantics.
+They identified severe attacks that threaten the confidentiality of the information stored in DBMSs. Attackers can exploit advanced database features and the DBMS' semantics to infer sensitive information.
 %
-One of those families are \emph{confidentiality attacks}. These allow an attacker to infer sensitive information based on the system's behaviour.
+They further developed a formal framework, consisting of an operational semantics and attacker model as well as precise security properties, to reason about the precise security guarantees offered by access control mechanisms in database systems.
 %
-They further developed a formal framework, consisting of formal database semantics and attacker model as well as precise security properties, to reason about the precise security guarantees offered by access control mechanisms in database systems.
+Using this framework, they developed an access control mechanism that provably prevents these attacks.
 %
-Using this framework, they developed an access control mechanism that provably prevents both families of attacks.
-
-Due to the gravity of the current situation, where the mentioned attacks can cause severe damage, this thesis explores the possibility of preventing confidentiality attacks in PostgreSQL, a widely used DBMS.
+This access control mechanism prevents the attacks by introducing more comprehensive and frequent security checks during the execution of the database system.
+%
+One building block of this algorithm is a new mechanism to decide the authorization of \texttt{SELECT} queries that is more permissive than the current standard, but offers the same level of security.
 
 The mechanism proposed by Guarnieri et al., has several limitations in practice.
 %
@@ -28,13 +28,13 @@ Existing Database Management Systems (DBMSs), however, are based on SQL.
 %
 Despite SQL is inspired by the relational calculus, it differs from it in significant ways.
 %
-Thus, extending Guarnieri et al.'s mechanism to SQL poses several challenges, \remark{bag vs. set? for the confidentiality part we did not really have many problems right?}, and it is crucial to effectively secure state-of-the-art DBMSs.
+Thus, extending Guarnieri et al.'s mechanism to SQL poses several challenges,i.e, SQL and relational algebra differ in syntax and semantics, e.g., SQL uses a bag semantics whereas the relational algebra is based on sets, and it is crucial to effectively secure state-of-the-art DBMSs.
 
 \smallskip
 \noindent
 {\bf Contributions.}
 %
-In this thesis, we extend  the access control mechanism proposed by Guarnieri et al.~\cite{guarnieri2016strong} to SQL, and we integrate it inside PostgreSQL
+Due to the gravity of the current situation, where the mentioned attacks can cause severe damage, this thesis explores the possibility of preventing confidentiality attacks in PostgreSQL, a widely used DBMS.
 %
 First, we refactor the original PostgreSQL's implementation to isolate the access control mechanism and provide a general interface for access requests, independent of the type of query.
 %
@@ -46,19 +46,17 @@ Second, we extend the access control mechanism proposed by Guarnieri et al.~\cit
 %
 This is essential to effectively secure PostgreSQL and prevent leakages of sensitive information.
 %
-In more detail, we achieve this goal by computing over- and underapproximations of the tuples returned by a query. The query is only authorized iff the approximations contain the same set of tuples.
+In more detail, we implemented a new access control mechanism for \texttt{SELECT} queries, which, as mentioned before, represents the first building block of successfully implementing the access control mechanism proposed by Guarnieri et al.
 %
 \remark{
 As shown in our experiments, our mechanism introduces an overhead, on average, of XX\%, in contrast to Guarnieri et al.'s mechanism  that  has an overhead of ...X\cite{guarnieri2016strong}.
 }
-%
-Furthermore, our algorithm is  more permissive than the PostgreSQL's mechanism, namely there are secure commands authorized by our solution and not authorized by PostgreSQL. etc.  
 
 \smallskip
 \noindent
 {\bf Organization.}
 %
-In the next chapter we will introduce some motivating examples of attacks from both families. 
+In chapter 2 we will introduce some motivating examples.
 %
 In chapter 3 we will give background information to access control by comparing current access control mechanism to the model introduced in~\cite{guarnieri2016strong}.
 %

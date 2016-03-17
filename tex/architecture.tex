@@ -34,7 +34,7 @@ Sometimes however, such as in the case of a \texttt{CREATE TRIGGER} command, the
 %
 \begin{figure}[!ht]
   \centering
-    \includegraphics[width=0.6\textwidth]{img/backend_flowchart.png}
+    \includegraphics[width=1\textwidth]{img/backend_flowchart.png}
     \caption{Backend Flowchart PostgreSQL \protect \footnotemark}
 \end{figure}
 %
@@ -44,10 +44,18 @@ Sometimes however, such as in the case of a \texttt{CREATE TRIGGER} command, the
 %
 \subsection{Refactoring}
 %
-After analyzing the backend, by executing each type of query and following the backend throught the process with a debugger, all the code relevant to making access control decisions was identified.
+After analyzing the backend, by executing each type of query and following the backend throught the process with a debugger, all the functions or code regions relevant to making access control decisions was identified.
 %
 This identification allowed to gradually move the code to a external module and build a uniform interface which is called inside the traffic cop, when the backend expects a decision.
 %
-Afther the process of refactoring it is possible to integrate any access control mechanism as a plug-in.
+The building of a uniform interface however introduced several engineering challenges.
 %
-There is very little understanding of the backend internals needed to correctly implement such an access control mechanism.
+Depending on the function the type of the return value is different. Also some code that was moved to the external module was not a function, but part of a function without a return value.
+%
+
+%
+After the process of refactoring it is possible to integrate any access control mechanism as a plug-in.
+%
+
+%
+\subsection{Implementation}
