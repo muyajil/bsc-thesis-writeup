@@ -6,19 +6,38 @@ The subject of query containment refers to the problem where for two queries $Q_
 %
 \remark{introduce indistinguishability of database states}
 %
-\remark{maybe reference to book for NP hardness} 
+\remark{maybe reference to book for NP hardness.}
+
+\remark{State the problem clearly. Give decidability results. Discuss its use in databases.}
+
+\remark{
+The problem is undecidable for Relational Calculus and SQL.
+%
+It is NP-hard only for conjunctive queries.
+} 
 
 \subsection{Query Containment Approximation}
 
-Since the decision of query containment is \emph{NP-hard}, i.e., not decidable in polynomial time, Guarnieri et al. have developed a rule set that over- respectively underapproximates the containment.
+\remark{There is no intuition whatsoever on why we need query containment for checking security.
+%
+In the paper, we defined an algorithm for checking containment and we use it as a key component of the security check.
+%
+The algorithm is formalized using inference rules and it is an under-approximation.
+%
+The algorithm is only for relational calculus.
+%
+Here, we extend it to SQL.
+}
+
+Since the decision of query containment is \emph{NP-hard}, i.e., not decidable in polynomial time \remark{only if $P \neq NP$}, \remark{Undecidable!!}  Guarnieri et al. have developed a rule set that under-approximates query containment.
 %
 The rules were developed for the relational algebra, which as mentioned before differs from SQL. 
 %
-Thus during the thesis these rules were extended to support SQL.
+Thus during the thesis these rules were extended to support SQL. \remark{Just say ``Here, we extend these rules to SQL.''}
 %
 In the following we will present the rule set for SQL. 
 %
-Let $T_i$ denote tables, $A_i$ sets of attributes within tables, $Q_i$ complete \texttt{SELECT} queries, and greek letters stand for boolean expressions.
+Let $T_i$ denote tables, $A_i$ sets of attributes within tables, $Q_i$ complete \remark{Unclear} \texttt{SELECT} queries, and greek letters stand for boolean expressions.
 \newline
 {\renewcommand{\arraystretch}{1.5}
 \begin{center}
@@ -107,21 +126,27 @@ Let $T_i$ denote tables, $A_i$ sets of attributes within tables, $Q_i$ complete 
 	\end{longtable}
 \end{center}
 
-During this thesis a subset of the rules above were implemented.
+\remark{ Explain the rules. Use a better notation (as inference rules?)}
+
+During this thesis a subset of the rules above were implemented. 
+\remark{This can be said in the chapter on the prototype. No need to say this here.}
 
 \subsection{Authorization of \texttt{SELECT} queries}
 
-In the example previously introduced in chapter 3, we showed that the current access control mechanism implemented in PostgreSQL is more restrictive than the mechanism implemented for this thesis.
+In the example previously introduced in chapter 3\remark{ In Chapter 3} , we showed that the current access control mechanism implemented in PostgreSQL is \remark{say something like ``too restrictive to be used, in practice, with powerful access control mechanisms such as the one in the paper''}  more restrictive than the mechanism implemented for this thesis.
 %
+\remark{Here, we develop a new mechanism, which relies on ...}
 The new mechanism relies on the concept of query containment.
 %
+
+\remark{Add an ALgorithm explaining the rewriting!}
 For each \texttt{SELECT} query $Q$ issued by some user $u$ we do the following:
 %
 First we compute the overapproximation of the query using the query containment rules.
 %
-For each table or view $T$ referenced in the \texttt{SELECT} query, we compute the set $T^\bot$ that contains all tables or views that contain $T$.
+For each table or view $T$ referenced in the \texttt{SELECT} query, we compute the set $T^\bot$, which contains all tables and views that contain $T$.
 %
-After that we rewrite the original query $Q$ by replacing each referenced table or view with the intersection of all tables or views $\in T^\bot$ that, according to the access control policy, are readable to the user $u$.
+After that we rewrite the original query $Q$ by replacing each referenced table or view with the intersection of all tables or views $ \in T^\bot$ \remark{T is free variable here}  that, according to the access control policy, are readable to the user $u$.
 %
 This query is then submitted to the database and obtain the set of resulting tuples $Q^\bot$.
 %
@@ -132,6 +157,7 @@ Then we will rewrite the original query $Q$ by replacing each referenced table o
 After that we obtain the set of resulting tuples $Q^\top$.
 %
 The original query $Q$ is authorized if $Q^\top = Q^\bot$.
+
 
 \smallskip
 \noindent
@@ -161,3 +187,14 @@ $u$ issues the following query $Q := $ \texttt{SELECT * FROM Programmers}, which
 According to the rules above, specifically (2), we can deduce that \texttt{Programmers} $\subseteq$ \texttt{Employees} and \texttt{Oldprogrammers} $\subseteq$ \texttt{Programmers}.
 %
 \remark{I think we must include the table the user selects from, even if it is not authorized by the ACL, otherwise the example won't work...}
+
+\remark{
+%
+New Example: 
+%
+Table \texttt{Programmers}, \texttt{Clerks}, and \texttt{HR}.
+%
+Views \texttt{Old\_Programmers := SELECT * FROM PROGRAMMER WHERE Age > 40}, \texttt{Young\_Programmer := SELECT * FROM PROGRAMMER WHERE Age <= 40}, \texttt{Clerk\_OR\_Programmers = SELECT * FROM Programmers UNION SELECT * FROM Clerks}, and \texttt{Clerk\_OR\_HR = SELECT * FROM Programmers UNION SELECT * FROM HR}.
+%
+This should do the trick :-)
+}
