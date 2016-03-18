@@ -1,6 +1,6 @@
 \section{Architecture}
 %
-This section introduces the architecture of the currently distributed version of PostgreSQL.
+This section introduces the architecture of the currently distributed version of PostgreSQL \remark{current version of PostgreSQL}.
 %
 Furthermore it is shown how the architecture looks after the refactoring and implementation of the new algorithm.
 %
@@ -19,21 +19,23 @@ Utility queries include all queries that modify the structure of the database, e
 %
 Non-utility queries on the other hand, modify the data in the underlying database structure, such as, add tuples, update tuples, or delete tuples.
 %
-The main difference between the former and the latter is that utility commands are, in general, \emph{non-optimizable}. \remark{Undefined? True? -> Defined and true in the backend :) Should I add the comments from the backend here?}
+The main difference between the former and the latter is that utility commands \remark{commands?queries?} are, in general, \emph{non-optimizable}. \remark{Undefined? True? -> Defined and true in the backend :) Should I add the comments from the backend here? }
+%
+\remark{The thesis must be self-contained. All the specific terminology must be explained and defined before use.}
 %
 That means it makes no sense to rewrite and optimize them, since there is generally no room for optimization.
 
-Non-utility commands however go through several stages of the backend, where they are rewritten, plans are generated, the optimal plan is chosen and finally it is executed.
+Non-utility commands however go through \remark{are processed in?} several stages of \remark{in?} the backend, where they are rewritten, plans are generated, the optimal plan is chosen and finally it is executed.
 %
-Further the access control mechanism consists of different functions and code areas within functions, which are distributed among the modules.
+Further the access control mechanism consists of different functions and code areas \remark{?} within functions, which are distributed among the modules.
 %
-Access control decisions can be made in any of the the following: Traffic cop, Executor, or in the module that handles the utility queries.
+Access control decisions can be made in any of the the following: Traffic cop, Executor, or in the module that handles the utility queries. \remark{undefined}
 %
-The functions making these decisions, however also prepare the system for the upcoming change, by, e.g., returning address where a new table is allocated, or returning the id of a already created trigger.
+The functions making these decisions, however also prepare the system for the upcoming change, by, e.g., returning address where a new table is allocated, or returning the id of a already created trigger. \remark{?}
 %
-Due to the distribution and unconsistency of the access control mechanism, there is no uniform interface that can be called for such a decision.
+Due to the distribution and inconsistency \remark{?} of the access control mechanism, there is no uniform interface that can be called for such a decision.
 %
-Further the mechanism is, at some points, deeply connected with the internals of the database, making the implementation of a new mechanism nearly impossible without refactoring the code.
+Furthermore  the mechanism is, at some points, deeply connected with the internals of the database, making the implementation of a new mechanism nearly impossible without refactoring the code.
 %
 \begin{figure}[!ht]
   \centering
@@ -49,7 +51,7 @@ Further the mechanism is, at some points, deeply connected with the internals of
 %
 After analyzing the backend, by executing each type of query and following the backend throught the process with a debugger, all the functions or code regions relevant to making access control decisions was identified.
 %
-This identification allowed to gradually move the code to a external module and build a uniform interface which is called inside the traffic cop, when the backend expects a decision.
+This identification allowed to gradually move the code to an external module and build a uniform interface which is called inside the traffic cop, when the backend expects a decision. 
 %
 The building of a uniform interface however introduced several engineering challenges.
 %
