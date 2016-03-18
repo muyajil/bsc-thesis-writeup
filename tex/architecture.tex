@@ -9,31 +9,31 @@ Furthermore it is shown how the architecture looks after the refactoring and imp
 \remark{This is one HUGE paragraph. Split it :-)}
 
 %
-In the current version of PostgreSQL the access control module is not identifiable as \remark{a stand-alone?} module in the backend code of the DBMS.
+In the current version of PostgreSQL the access control module is not identifiable as a stand-alone module in the backend code of the DBMS.
 %
-\remark{Figure~\ref{figure:postgresql:architecture}} shows a flowchart of the backend of PostgreSQL. \remark{The flowchart shows backend's behaviour. The backend is just a bunch of code. It's static and has no ``flow''.}
+\remark{Figure~\ref{figure:postgresql:architecture}} shows a flowchart of the backend of PostgreSQL. The flowchart shows backend's behaviour.
 %
-It is shown that there are two general types of queries: \emph{utility commands} and \emph{non-utility commands}. \remark{Get rid of ``It is shown that''. Be concise and avoid needless words! There are two types of commands or queries? Pick a terminology and stick to it.}
+There are two types of queries: \emph{utility queries} and \emph{non-utility queries}.
 %
-Utility commands include all commands that modify the structure of the database, i.e., adding a new table or view, creating a new trigger, or modifying the access control policy  for example. \remark{You're giving examples so you should use ``e.g.''. This is latin and stands for \emph{exempli gratia}, which can be roughly translated as ``for example''. For this reason, you don't need the ``for example'' at the end.}
+Utility queries include all queries that modify the structure of the database, e.g., adding a new table or view, creating a new trigger, or modifying the access control policy.
 %
-Non-utility commands on the other hand, modify the data in the underlying database structure, i.e., add tuples, update tuples or delete tuples for example. \remark{Here, ``e.g.'' instead of ``i.e.'' again. However, ``such as'' sounds better and avoid repetitions.}
+Non-utility queries on the other hand, modify the data in the underlying database structure, such as, add tuples, update tuples, or delete tuples.
 %
-The main difference between those\remark{Replace with ``the former and the latter''} is that utility commands are, in general, \emph{non-optimizable}. \remark{Undefined? True?}
+The main difference between the former and the latter is that utility commands are, in general, \emph{non-optimizable}. \remark{Undefined? True? -> Defined and true in the backend :) Should I add the comments from the backend here?}
 %
-That means it makes no sense to pass them through the query rewriter or optimizer, since there is generally no room for optimization. \remark{Pass through sounds terrible :-)} 
+That means it makes no sense to rewrite and optimize them, since there is generally no room for optimization.
+
+Non-utility commands however go through several stages of the backend, where they are rewritten, plans are generated, the optimal plan is chosen and finally it is executed.
 %
-Non-utility commands however are passed through several stages of the backend, where they are rewritten, plans are generated, the optimal plan is chosen and finally the optimal plan is executed.
+Further the access control mechanism consists of different functions and code areas within functions, which are distributed among the modules.
 %
-As mentioned before there is no interface that allows these different stages of the backend to request a access control decision \remark{This is a bit unclear. This must be one of the key points of this section.}.
+Access control decisions can be made in any of the the following: Traffic cop, Executor, or in the module that handles the utility queries.
 %
-Therefore the decision if a query is authorized or not is usually done inside the so-called traffic cop, which, as the name indicates, moderates \remark{wrong verb? forwards?} the incoming queries to the correct modules.
+The functions making these decisions, however also prepare the system for the upcoming change, by, e.g., returning address where a new table is allocated, or returning the id of a already created trigger.
 %
-Inside the traffic cop however it depends again on the exact type of the query, i.e., if the query is a \texttt{SELECT}, \texttt{INSERT} or other type, how the decision is made. \remark{E.g.,}
+Due to the distribution and unconsistency of the access control mechanism, there is no uniform interface that can be called for such a decision.
 %
-Due to this\remark{This what?}\remark{,} the access control mechanism in the current version of PostgreSQL is deeply connected with the internals of the backend, because the functions usually do not only retrieve the ACL, but prepare the system catalogs and the tables that contain the database structure, for the upcoming change. \remark{The last two sentences are completely obscure.}
-%
-Sometimes however, such as in the case of a \texttt{CREATE TRIGGER} command, the decision is made in the course of creating the trigger, i.e., there is no external function called that makes the decision.
+Further the mechanism is, at some points, deeply connected with the internals of the database, making the implementation of a new mechanism nearly impossible without refactoring the code.
 %
 \begin{figure}[!ht]
   \centering
@@ -53,24 +53,18 @@ This identification allowed to gradually move the code to a external module and 
 %
 The building of a uniform interface however introduced several engineering challenges.
 %
-Depending on the function the type of the return value is different. Also some code that was moved to the external module was not a function, but part of a function without a return value.
+The first decision was to create a stand-alone module in the backend of PostgreSQL, which allows developers to clearly identify the code that is responsible for authorizing any type of query.
 %
-\remark{I find it difficult to add more content here, should I describe specific examples? It is the thing that took most of the time...}
-
-
-\remark{
-Here you should:
+Second we built an interface, that can be called from any module, when requiring an access control decision.
 %
-1) describe the rationale behind our architectural choices,
+Any function that calls this interface will pass all the data needed to make the decision.
 %
-2) describe the interface, and 
+Depending on the data received the interface internally calls the functions that were previously distributed among the modules.
 %
-3) give some interesting information on the implementation.
-}
-
+This allows for future developers to gradually implement a new algorithm, by identifying the query received, and either return the result of a new algorithm, or call the original function responsible for the query.
+%
+Further we added a stack that at any point of the execution of the database system, holds all queries that are not yet completed.
+%
+This allows developers to always have a clear view on the state of the database system.
 %
 After the process of refactoring it is possible to integrate any access control mechanism as a plug-in.
-%
-
-%
-\subsection{Implementation}
