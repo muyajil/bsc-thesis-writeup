@@ -1,17 +1,17 @@
 \contentsline {section}{\numberline {1}Introduction}{2}{section.1}
 \contentsline {section}{\numberline {2}Motivating Examples}{4}{section.2}
 \contentsline {subsection}{\numberline {2.1}Confidentiality Attacks}{4}{subsection.2.1}
-\contentsline {section}{\numberline {3}Background}{6}{section.3}
-\contentsline {section}{\numberline {4}Architecture}{8}{section.4}
-\contentsline {subsection}{\numberline {4.1}Current architecture}{8}{subsection.4.1}
-\contentsline {subsection}{\numberline {4.2}Refactoring}{10}{subsection.4.2}
-\contentsline {subsection}{\numberline {4.3}Implementation}{10}{subsection.4.3}
-\contentsline {section}{\numberline {5}Algorithms}{11}{section.5}
-\contentsline {subsection}{\numberline {5.1}Query Containment}{11}{subsection.5.1}
-\contentsline {subsection}{\numberline {5.2}Query Containment Approximation}{11}{subsection.5.2}
-\contentsline {subsection}{\numberline {5.3}Authorization of \texttt {SELECT} queries}{12}{subsection.5.3}
-\contentsline {section}{\numberline {6}Experiments}{14}{section.6}
-\contentsline {section}{\numberline {7}Related Work}{15}{section.7}
-\contentsline {section}{\numberline {8}Conclusion}{16}{section.8}
-\contentsline {section}{\numberline {A}Appendix}{17}{appendix.A}
-\contentsline {section}{References}{18}{appendix.A}
+\contentsline {section}{\numberline {3}Background}{7}{section.3}
+\contentsline {section}{\numberline {4}Architecture}{9}{section.4}
+\contentsline {subsection}{\numberline {4.1}Current architecture}{9}{subsection.4.1}
+\contentsline {subsection}{\numberline {4.2}Refactoring}{12}{subsection.4.2}
+\contentsline {subsection}{\numberline {4.3}Implementation}{12}{subsection.4.3}
+\contentsline {section}{\numberline {5}Algorithms}{13}{section.5}
+\contentsline {subsection}{\numberline {5.1}Query Containment}{13}{subsection.5.1}
+\contentsline {subsection}{\numberline {5.2}Query Containment Approximation}{13}{subsection.5.2}
+\contentsline {subsection}{\numberline {5.3}Authorization of \texttt {SELECT} queries}{14}{subsection.5.3}
+\contentsline {section}{\numberline {6}Experiments}{16}{section.6}
+\contentsline {section}{\numberline {7}Related Work}{17}{section.7}
+\contentsline {section}{\numberline {8}Conclusion}{18}{section.8}
+\contentsline {section}{\numberline {A}Appendix}{19}{appendix.A}
+\contentsline {section}{References}{20}{appendix.A}

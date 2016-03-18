@@ -1,5 +1,7 @@
 \ProvidesPackage{style}
 
+\usepackage[dvipsnames]{xcolor} 
+
 \usepackage{hyperref}
 
 \usepackage{placeins}
@@ -24,9 +26,40 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{longtable}
-%\usepackage [table]{xcolor} 
+
+%\usepackage[usenames]{color}
 
 \newcommand{\remark}[1]{\textcolor{red}{$\blacktriangleright$\textbf{#1}$\blacktriangleleft$}}
+
+\renewcommand{\maketitle}
+  {\setlength{\unitlength}{1mm}
+  \begin{minipage}{\textwidth}
+    \ETHlogo[55mm]\hfill%\includegraphics[scale=.45]{infsec}
+  \end{minipage}
+  \begin{center}
+    {\color{Gray} \rule{.8\textwidth}{.5pt}}
+  \end{center}
+  \begin{center}
+    {\Large Bachelor Thesis}\\
+    \vspace{10pt}
+    {\huge \bf {Strong and Secure Database Access Control for PostgreSQL}}\\
+    \vspace{7pt}
+    % Contact: 
+    \begin{tabular}{rl}
+      Student: & Mohammed Ajil \\
+      Student ID: & 11-948-734 \\
+      Supervisors: & Marco Guarnieri \\
+      Professor: & David Basin \\
+      Date: & 21.03.2016 \\
+    \end{tabular}
+    % \proposal@contact
+    \vspace{-2pt}
+  \end{center}
+
+  \begin{center}
+    {\color{Gray} \rule{.8\textwidth}{.5pt}}
+  \end{center}
+}
 
 \newtheorem{attackInt}{Attack}
 
