@@ -31,17 +31,24 @@ Here, we extend it to SQL.
 
 Since the decision of query containment is \emph{NP-hard}, i.e., not decidable in polynomial time \remark{only if $P \neq NP$}, \remark{Undecidable!!}  Guarnieri et al. have developed a rule set that under-approximates query containment.
 %
-The rules were developed for the relational algebra, which as mentioned before differs from SQL. 
+The rules were developed for the relational algebra \remark{Relational calculus}, which as mentioned before differs from SQL. 
 %
 Here we extend these rules to SQL.
 %
-In the following we present this extended rule set. 
+In the following we present this extended rule set. \remark{Remove this sentence. It just repeats the one before.}
 %
-Let $T_i$ denote tables, $A_i$ sets of attributes within tables, $Q_i$ \texttt{SELECT} queries of the form \texttt{SELECT $A$ FROM $T$ WHERE $\phi$}, and greek letters stand for boolean expressions on the tuples contained in the tables.
+Let $T_i$ denote \remark{Sets of?} tables, $A_i$ sets of attributes within tables, $Q_i$ \texttt{SELECT} queries of the form \texttt{SELECT $A$ FROM $T$ WHERE $\phi$, and greek letters stand for boolean expressions on the tuples contained in the tables.
 %
 The inference rules consist of tuples $(u,Q)$ where $u$ is the user issuing the query $Q$.
 %
-All the following rules are only applicable if the user $u$ is allowed to read all tables or views referenced in the premiss.
+All the following rules are only applicable if the user $u$ is allowed to read all tables or views referenced in the premiss \remark{premise}.
+%
+\remark{Containment is independent from the user. I don't see why you added this restriction. It's probably even too restrictive for our algorithm.}
+
+
+\remark{The rules are written in a very weird way. Who is contained in what? Look at how I've wrote the rules in the technical report.} 
+
+\remark{Put all the rules in a figure. Give them a name. Explain each rule and refer to it as ID-rule, AND-rule, etc.}
 
 \[
 \infer[\text{ID}]
@@ -57,7 +64,9 @@ Any \texttt{SELECT} query is contained in itself.
 	{(u,\text{\texttt{SELECT $A_1$ FROM $T_1$ WHERE $\phi \land \psi$}})}
 \]
 
-The rule holds since we weaken the condition by reducing the number of boolean expressions in the conjunction. Therefore the tuples resulting from the query in the premiss are contained in the tuples resulting from the query in the conclusion.
+\remark{In principle, we need also a rule for the $\psi$'s case.}
+
+The rule holds since we weaken the condition by reducing the number of boolean expressions in the conjunction \remark{It's a bit unclear}. Therefore the tuples resulting from the query in the premiss are contained in the tuples resulting from the query in the conclusion.
 
 \[
 \infer[\text{OR1}]
@@ -81,6 +90,13 @@ This rule holds since we again weaken the condition again by adding a disjunctio
 
 In this rule the tuples resulting from both queries are the same since the condition in the \texttt{WHERE} clause is the same for both queries. The data however from the query in the premiss is contained in the data from the conclusion.
 
+\remark{Description is completely unclear. Moreover, the containment does not hold. 
+%
+Containment $Q_1' \subseteq Q_2'$ holds in case we already know that $Q_1 \subseteq Q_2$ and the queries $Q_1'$ and $Q_2'$ are obtained from $Q_1$ and $Q_2$ by projecting out the same attribute $A$.
+}
+
+
+
 \[
 \infer[\text{PROJ2}]
 	{(u,\text{\texttt{SELECT $A_2$ FROM $T_2$ WHERE $\phi$}})}
@@ -88,6 +104,8 @@ In this rule the tuples resulting from both queries are the same since the condi
 \]
 
 Here the same argumentation holds as above. Addionally we have that the table we are querying from in the premiss is contained in the respective table in the conclusion. Therefore it is obvious that all data returned from querying $T_1$ is contained in the data returned from $T_2$.
+
+\remark{It is not obvious at all. The containment again does not hold. THere is no tuple in the first query that is contained also in the second query.}
 
 \[
 \infer[\text{INTER1}]
@@ -127,26 +145,29 @@ This rule holds by the definition of subtracting sets.
 
 \subsection{Rewriting of \texttt{SELECT} queries}
 
-In the new algorithm one component of authorizing \texttt{SELECT} queries is the rewriting of those.
+In the new algorithm one component of authorizing \texttt{SELECT} queries is the rewriting of those. \remark{Unclear}
 %
-The rewriting produces a new query, where the resulting set is the set of tuples equal to subtracting an under-approximation of the query from an over-approximation of the query.
+The rewriting produces a new query, where the resulting set is the set of tuples equal to subtracting an under-approximation of the query from an over-approximation of the query. \remark{Unclear. Under- and Over- approximations with respect to what? Containment? These concepts have never been defined before. In SQL the result is a bag (or multiset) not a set.}
 %
 Both the under- and the over-approximation are secure queries for the user, since they only reference tables, which the user is authorized to read.
 %
-The approximations are computed based on the inference rules introduced above.
+The approximations are computed based on the inference rules introduced above. \remark{No. The approximations are computed by the rewriting algorithm. The inference rules for containment are used only for computing the 
 %
 We define the function $\operatorname{rewrite}(Q)$, where $Q$ is a \texttt{SELECT} query of the form \texttt{SELECT $A$ FROM $T$ WHERE $\phi$}.
 %
-Further we define two functions $\operatorname{under}(Q)$ and $\operatorname{over}(Q)$,  where $Q$ is passed from $\operatorname{rewrite}$.
+Further we define two functions $\operatorname{under}(Q)$ and $\operatorname{over}(Q)$,  where $Q$ is passed from $\operatorname{rewrite}$. \remark{Unclear. What is \texttt{operatorname}?}
 %
-These two functions return a query that is an over- respectively under-approximation.
+These two functions return a query that is an over- respectively under-approximation. \remark{Again. With respect to what?}
+
+\remark{where are the function?}
 
 \smallskip
 \noindent
 {$\mathbf{ \mathrm{\bf over}(Q)}$:}
 %
-In this function we first build an inference forest that includes all possible inference trees from the rules introduced above.
+In this function we first build an inference forest that includes all possible inference trees from the rules introduced above. \remark{undefined concepts}
 %
+\remark{First give a precise algorithm. Afterwards, explain the algorithm with the example.}
 As an example recall the database setup from the motivating example:
 \\
 Consider a database with tables \texttt{Programmers}, \texttt{Clerks}, and \texttt{HR}, containing the information of employees of the respective departements.
@@ -217,10 +238,11 @@ The function $\operatorname{under}(Q)$ is implemented analogously, and returns t
 It is possible to have a better under-approximation by applying the rules PROJ1 and PROJ2. In this example however the above forest is a good enough approximation.
 
 After that the function $\operatorname{rewrite}(Q)$ returns the query \texttt{$Q^\bot$ EXCEPT $Q^\top$}.
+\remark{Why?}
 
 \subsection{Authorization of \texttt{SELECT} queries}
 
-In the example previously introduced a motivating example , we showed that the current access control mechanism implemented in PostgreSQL too restrictive to be used, in practice, with powerful access control mechanisms such as the one in the paper.
+In the example previously introduced a motivating example \remark{In Chapter X}, we showed that the current access control mechanism implemented in PostgreSQL \remark{is }too restrictive to be used, in practice, with powerful access control mechanisms such as the one in the paper.
 %
 Here, we develop a new mechanism, which relies on query containment and the rewriting function introduced above.
 %
@@ -228,7 +250,9 @@ For each query $Q$ we will execute the function $\operatorname{rewrite}(Q)$.
 %
 The returned query will then be executed.
 %
-$Q$ will be authorized if the result is \texttt{NULL}.
+$Q$ will be authorized if the result is \texttt{NULL}. \remark{I guess the result is $\emptyset$, not null.}
+
+\remark{Why is this a good criterion for security? What does this section add to the story?}
 
 \smallskip
 \noindent
