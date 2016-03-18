@@ -1,15 +1,14 @@
 \section{Background}
 
-In this section it is shown why the current access control mechanisms are flawed by contrasting the current access control mechanism in PostgreSQL with the new access control mechanism based on~\cite{guarnieri2016strong}.
-%
-The access control mechanism used in PostgreSQL is to a large extent an implementation of the access control model defined by the SQL standard.
-%
-This standard makes the assumption that information can only be leaked through \texttt{SELECT} queries issued to the DBMS. \remark{Too strong. There is no such explicit assumption. Rather, the assumption is ``implicit'' and clear if you look at how the handle things.}
+In this Chapter we introduce the SQL access control model and outline how it is implemented in PostgreSQL.
 %
 The conclusions made in the following paragraphs are backed by an analysis of the backend code of PostgreSQL, since a proper documentation of the internals is missing.
 
+\subsection{SQL access control model}
+
 \remark{I'd first start by outlining the SQL access control model. There are privileges. Privileges are assigned/revoked using \texttt{GRANT} and \texttt{REVOKE} commands. This kind of things :-) This is essential to understand the rest (e.g., what are ACLs? how are they defined? what are the roles?)}
 
+\subsection{Implementation in PostgreSQL}
 The administrator has to define an access control policy for the database. 
 %
 This policy defines how users can interact with the system.
@@ -33,49 +32,3 @@ Depending on the object different privileges are applicable.
 For example the execution privilege is only applicable to functions and triggers, whereas the insert privilege is only applicable to tables or views.
 %
 When issuing a query to the database, depending on the query, a function is executed which, among other things, retrieves the ACL for the objects referenced in the query and checks if the required privileges are available for the user issuing the command.
-
-\smallskip
-\noindent
-{\bf Example:}
-%
-Consider a database with the following objects:
-%
-\begin{itemize}
-	\item A table \texttt{Employees} containing all employees.
-	\item A view \texttt{Programmers} defined by:
-		\begin{verbatim}
-		SELECT * 
-		FROM Employees
-		WHERE Job = "Programmer"
-		\end{verbatim}
-	\item A view \texttt{Oldprogrammers} defined by:
-		\begin{verbatim}
-		SELECT *
-		FROM Programmers
-		WHERE Age > 40
-		\end{verbatim}
-\end{itemize}
-%
-Assume that user $u$ is allowed to read all three objects. When $u$ issues the query $Q_1 := $ \texttt{SELECT * FROM Programmers}. 
-%
-The current access control mechanism will retrieve the ACL for \texttt{Programmers} and check if user $u$ has read access to \texttt{Programmers}. 
-%
-Since this is the case the query will be authorized.
-%
-The new mechanism implemented during this thesis will also authorize this query.
-%
-Now assume that user $u$ is allowed to read \texttt{Oldprogrammers} and \texttt{Employees}, but not allowed to read \texttt{Programmers}.
-%
-The current mechanism will not authorize this query, since the ACL of \texttt{Programmers} does not include read privileges for user $u$.
-%
-But since $u$ has access to the table \texttt{Employees}, $u$ can issue the query $Q_2 := $ \texttt{SELECT * FROM Employees WHERE Job="Programmer"}.
-%
-This query however will be authorized by the current mechanism and yield the same results than $Q_1$.
-%
-The new access control mechanism will detect this behaviour of the system and authorize $Q_1$.
-%
-Therefore the new mechanism is more permissive than the old one.
-%
-In chapter 5 we will return to this example and explain how.
-
-\remark{I like the example. It has to be polished and clarified a bit though. Moving it to motivating examples?}

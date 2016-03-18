@@ -1,93 +1,35 @@
-\section{Motivating Examples}
+\section{Motivating Example}
 
+As mentioned in the Introduction we have implemented a more permissive and equally secure mechanism to decide the authorization of \texttt{SELECT} queries.
+%
+The following example should demonstrate this mechanism for a simple database.
 
-\remark{Do we still need these motivating examples with the new story? I'd rather add a few examples illustrating that the SQL access control mechanism for SELECTs is too restrictive and how it impacts the algorithm in~\cite{guarnieri2016strong}. Then, we can even illustrate (only using a very high level example) how our solution will work.}
-
-We show here how users can exploit advanced features of DBMSs to attack database confidentiality
+\smallskip
+\noindent
+{\bf Example:}
 %
-The following attacks were first presented in~\cite{guarnieri2016strong}
+Consider a database with tables \texttt{Programmers}, \texttt{Clerks}, and \texttt{HR}, containing the information of employees of the respective departements.
 %
-In these attacks, the attacker manages to learn sensitive information from the database, that according to the security policy, should not be disclosed to the attacker.
+Further the database contains the following views:
+\begin{itemize}
+	\item \texttt{OldProgrammers} defined as \\ \texttt{SELECT * FROM Programmers WHERE Age > 40}
+	\item \texttt{YoungProgrammers} defined as \\ \texttt{SELECT * FROM Programmers WHERE Age <= 40}
+	\item \texttt{ProgrammerOrClerk} defined as \\ \texttt{(SELECT * FROM Programmers) UNION (SELECT * FROM Clerks)}
+	\item \texttt{ProgrammerOrHR} defined as \\ \texttt{(SELECT * FROM Programmers) UNION (SELECT * FROM HR)}
+\end{itemize}
 %
-Guarnieri et al. have mounted these attacks manually against several widely used DBMS with shocking results: No existing access control mechanism is able to fully prevent these attacks.
-
-\subsection{Confidentiality Attacks}
-
-In the following we will present confidentiality attacks. 
+Assume that there is a database user $u$ which has read access to all views, but does not have read access to the tables.
 %
-We will use \texttt{SELECT} and \texttt{INSERT} commands in combination with triggers and integrity constraints to infer classified information.
+The user $u$ wants to find out who is employed as a Programmer and issues the following query $Q := $ \texttt{SELECT * FROM Programmers}. 
 %
-According to~\cite{guarnieri2016strong} integrity constraints are invariants that must be satisfied for a database state to be considered \emph{valid}.
+This query will not be authorized by the current access control mechanism implemented in PostgreSQL.
 %
-\emph{Integrity constraint violations} arise when the execution of an SQL command leads the database from a valid state into an invalid one.
+Since however $u$ has access to the views \texttt{OldProgrammers} and \texttt{YoungProgrammers} he can issue the query $Q_1 := $ \texttt{(SELECT * FROM OldProgrammers) UNION (SELECT * FROM YoungProgrammers)}, which in turn will be authorized by the access control mechanism in PostgreSQL.
 %
-\begin{attack}
-{\bf Table updates and integrity constraints.~\cite{guarnieri2016strong}}
+Also the query $Q_2 := $ \texttt{(SELECT * FROM ProgrammerOrClerk) INTERSECTION (SELECT * FROM ProgrammerOrHR)} will be authorized by PostgreSQL.
 %
-Consider a database with two tables $P$ and $S$. 
+It is obvious that all three queries return the same results.
 %
-Suppose the primary key for both tables is the user's identifier.
+This behaviour of authorizing \texttt{SELECT} queries is a key part in the algorithm proposed in~\cite{guarnieri2016strong}.
 %
-Furthermore the set of user identifiers in $S$ is contained in the set of user identifiers in $P$, i.e., there is a foreign key from $S$ to $P$.
-%
-The attacker is user $u$, whose goal is to learn whether \texttt{Bob} is in $S$.
-%
-The access control policy is as follows: $u$ can read from $P$ and insert tuples into $S$.
-
-The attacker can learn whether \texttt{Bob} is in $S$ as follows:
-\begin{enumerate}
-	\item He reads $P$ and learns \texttt{Bob}'s identifier.
-	\item He issues an \texttt{INSERT} statement into $S$ using \texttt{Bob}'s id.
-	\item If \texttt{Bob} is already in $S$, then $u$ gets an error message about the primary key's violation. Alternatively there is no violation and $u$ learns that \texttt{Bob} is not in $S$.
-\end{enumerate}
-\end{attack}
-%
-The first step of this attack includes a \texttt{SELECT} statement to the database, from which the attacker knows that it does not change the database state.
-%
-The second step is actually the key of this attack, from the information the attacker has learned from the first step, he can issue the second step at any point in time.
-%
-Everytime the above \texttt{INSERT} command is issued, the attacker learns whether \texttt{Bob} is in the table $S$ in the database state that directly precedes the transaction containing the \texttt{INSERT} command.
-%
-In the next attack the attacker learns sensitive information by exploiting triggers.
-%
-The trigger is executed with owner's privileges, meaning it is executed with the same privileges as the user, which has created the trigger.
-
-\begin{attack}
-{\bf Triggers with owner's privileges.~\cite{guarnieri2016strong}}
-%
-Consider a database with tables $P$, $T$, and $N$.
-%
-The attacker is user $u$, who wishes to learn whether $v$ is in $T$.
-%
-The policy is as follows:
-%
-$u$ is not authorized to read table $T$, and he can read and modify tables $P$ and $N$.
-%
-Moreover, the following trigger has been defined by the administrator:
-%
-\begin{verbatim}
-CREATE TRIGGER t on P AFTER INSERT FOR EACH ROW
-	IF EXISTS(SELECT * FROM T where id = new.id)
-		INSERT new.id INTO N;
-\end{verbatim}
-%
-The attack is as follows:
-%
-\begin{enumerate}
-	\item $u$ deletes $v$ from $N$.
-	\item $u$ issues the command: \texttt{INSERT INTO P VALUES(v)}
-	\item $u$ checks the table $N$. If it contains $v$'s id, then $v$ is in $T$. Otherwise $v$ is not in $T$.
-\end{enumerate}
-%
-\end{attack}
-%
-In the first step the attacker issues a \texttt{DELETE} statement, from which he learns that $v$ cannot be in the table $N$ in the database state directly subsequent to the \texttt{DELETE} statement.
-%
-The attacker knows about the trigger in the database, and therefore can reason, that the trigger is always executed after an \texttt{INSERT} statement on table $P$.
-%
-He further knows, that the trigger is executed in the same transaction as the \texttt{INSERT} statement, therefore after issuing the \texttt{INSERT} into table $P$ it is not possible that another \texttt{INSERT} into $N$ is executed first.
-%
-Therefore the attacker knows, that if $v$ is not in $N$ in the database state where he issues the \texttt{INSERT} statement, $v$ is inserted into $N$ if and only if $v$ is already in $T$.
-
-\remark{What if between the delete and insert there is a command \texttt{INSERT INTO N VALUES(v)}? ANSWER: This attacker has to be sure that all the steps are executed consecutively without interferences from other users. There is a brief discussion about it in the paper (in the attacker model).}
-
+In Chapter 5 we will come back to this example and show how we authorize this query with the new access control mechanism implemented in PostgreSQL.
