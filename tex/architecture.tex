@@ -1,8 +1,9 @@
 \section{Architecture}
+
+
+Here, we introduce the architecture of the current version of PostgreSQL.
 %
-This section introduces the architecture of the current version of PostgreSQL.
-%
-Furthermore it is shown how the architecture looks after the refactoring and implementation of the new algorithm.
+We also show how the architecture looks after the refactoring and implementation of the new algorithm.
 %
 \subsection{Current architecture}
 %
@@ -16,13 +17,13 @@ The flowchart shows backend's behaviour.
 %
 Each box in the flowchart represents a module of PostgreSQL.
 
-The \emph{Main} module is responsible for checking the underlying system requirements, i.e., the system user starting the server, available memory etc. If all the requirements are met the \emph{Postmaster} process is started.
+The \emph{Main} module is responsible for checking the underlying system requirements, such as the system user starting the server, available memory etc. If all the requirements are met the {Postmaster} process is started.
 
-The Postmaster is the starting point for any PostgreSQL server instance. 
+The \emph{Postmaster} is the starting point for any PostgreSQL server instance. 
 %
 In this module system setup tasks such as loading the data representing the database and setting up listeners for database connections are executed.
 %
-After setting everything up the Postmaster waits for a connection request from a \emph{frontend application}, which refers to any application that connects to the database.
+After setting everything up, the Postmaster waits for a connection request from a \emph{frontend application}, i.e., any application that connects to the database.
 %
 When receiving a connection request the Postmaster forks itself.
 %
@@ -34,21 +35,24 @@ The Backend consists of an infinite loop which breaks at the parser stage.
 %
 At this point the Backend is ready to receive a query from the connected frontend application.
 %
-After receiving a query in text form the parser creates the abstract syntax tree representing the query.
+After receiving a query in text form, the parser creates the abstract syntax tree representing the query.
 %
 The abstract syntax tree is then passed to the \emph{Traffic Cop}.
 
-The Traffic Cop first analyzes the query to classify it either as a \emph{utility query} or \emph{non-utility query}.
+The Traffic Cop first analyzes the query to classify it either as a {utility query} or {non-utility query}.
 %
-Utility queries modify the structure of the databse, e.g., create/drop a table, create/drop a view, create/drop a trigger etc.
+\emph{Utility queries} modify the structure of the database, e.g., they create or drop a table, view, or  trigger.
 %
-Non-utility queries act on the data inside the database, e.g., select tuples, insert tuples, update tuples etc.
+\emph{Non-utility queries}, instead, act on the data inside the database.
 %
-After determining the type the Traffic Cop forwards utility queries to the \emph{Utility Command} module, which will check the authorization of the query and, if the query is authorized, execute it.
+For instance, \texttt{SELECT}, \texttt{DELETE}, and \texttt{UPDATE} are all non-utility queries. 
 %
-Non-utility commands are forwarded to the \emph{Rewrite Query} module.
+After determining the type the Traffic Cop forwards utility queries to the \emph{Utility Command} module, which checks the authorization of the query and, if the query is authorized, execute it.
 
-Here the query is rewritten according to the \emph{PostgreSQL Rule System}, which is a collection of rules on how to rewrite queries, such that they are optimized for PostgreSQL.
+
+Non-utility commands are forwarded to the \emph{Rewrite Query} module.
+%
+Here the query is rewritten according to the \emph{PostgreSQL Rule System}, which is a collection of rules on how to rewrite queries, such that they are optimized for PostgreSQL. \remark{Unclear}
 %
 After that the rewritten query is passed to the \emph{Generate Paths} module.
 %
@@ -71,27 +75,32 @@ This plan is then forwarded to the executor, which will execute it and return th
 \end{figure}
 %
 \footnotetext{\url{http://www.postgresql.org/developer/backend}}
-%
-\FloatBarrier
 \subsubsection{Access Control}
 %
 Access control decisions can be made in any of the the following: Traffic cop, Executor, or in the module that handles the utility queries.
 %
-The functions making these decisions, however also prepare the system for the upcoming change, by, e.g., returning address where a new table is allocated.
+The functions making these decisions, however also prepare the system for the upcoming change, by, for instance, returning address where a new table is allocated.
 %
 Due to the distribution and inconsistency of the access control mechanism, there is no uniform interface that can be called for such a decision.
 %
 Furthermore  the mechanism is, at some points, closely connected to the internals of the database, making the implementation of a new mechanism nearly impossible without refactoring the code.
+
+\remark{more information on this?}
+
+%
+\FloatBarrier
+
 %
 \subsection{Refactoring}
 %
-After analyzing the backend, by executing each type of query and following the backend throught the process with a debugger, all the functions or code regions relevant to making access control decisions was identified.
+After analyzing the backend, by executing each type of query and following the backend through the process with a debugger, all the functions or code regions relevant to making access control decisions was identified.
 %
 This identification allowed to gradually move the code to an external module and build a uniform interface which is called inside the traffic cop, when the backend expects a decision. 
 %
 The building of a uniform interface however introduced several engineering challenges.
 %
-The first decision was to create a stand-alone module in the backend of PostgreSQL, which allows developers to clearly identify the code that is responsible for authorizing any type of query.
+The first decision was to create a stand-alone module in the backend of PostgreSQL dedicated to access control.
+This allows developers to clearly identify the code that is responsible for authorizing any type of query.
 %
 Second we built an interface, that can be called from any module, when requiring an access control decision.
 
@@ -122,14 +131,16 @@ struct ac_decision_data_struct {
 %
 Further each field in the decision data struct is actually a pointer that refers to a struct, that in turn holds all information needed for deciding if the respective type of query is authorized.
 %
+\remark{Add some more information?}
 Any function that calls this interface will pass all the data needed to make the decision.
 %
-Depending on the data received the interface internally calls the functions that were previously distributed among the modules.
+Depending on the data received, the interface internally calls the functions that were previously distributed among the modules.
 %
 This allows for future developers to gradually implement a new algorithm, by identifying the query received, and either return the result of a new algorithm, or call the original function responsible for the query.
 %
 To facilitate the identification of the query received we have included an additional field in the decision data, which tells exactly what type of query was received by the interface, i.e., \texttt{INSERT} or \texttt{UPDATE} instead of just identifying it as a non-utility query.
-%
+
+\remark{This part is unclear. Why do we need the stack? What is its purpose? What information is on the stack?}
 Further we added a stack that at any point of the execution of the database system, holds all queries that are not yet completed.
 %
 This allows developers to always have a clear view on the state of the database system.
