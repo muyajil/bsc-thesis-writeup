@@ -14,21 +14,30 @@ This problem is well-known to be undecidable for relational calculus and SQL.~\c
 
 \subsubsection{Query Containment Approximation}
 
-\remark{\cite{guarnieri2016strong} is not the first developing inference rules for containment. It is unclear why you're focusing on these rules.
-%
-I'd first introduce (maybe in background?) the algorithm from \cite{guarnieri2016strong}, and here I'd recall that query containment is a key part.
-%
-Then you can say that you generalize the rules in \cite{guarnieri2016strong}.
-%
-}
-
+As shown in Chapter 3, query containment is a key part in access control algorithms such as the one proposed in~\cite{guarnieri2016strong}.
 Since query containment is undecidable, in general, Guarnieri et al. have developed a rule set that produces sound under-approximations of query containment.
 %
 The rules were developed for the relational calculus.
 %
 Here, we extend them to the SQL language.
 %
-Let $T_i$ denote sets of tables, $A_i$ sets of attributes within tables, $Q_i$ \texttt{SELECT} queries of the form \texttt{SELECT $A_i$ FROM $T_i$ WHERE $\phi$}, and greek letters stand for boolean expressions.
+Let $T_i$ denote sequences of tables, $A_i$ sequences of attributes within tables, greek letters stand for boolean expressions, and $Q_i$ \texttt{SELECT} queries as shown in figure~\ref{figure:algorithms:grammar}.
+
+
+\begin{figure}[!ht]
+
+\begin{grammar}
+<statement> ::= <ident> `=' <expr> 
+\alt `for' <ident> `=' <expr> `to' <expr> `do' <statement> 
+\alt `{' <stat-list> `}' 
+\alt <empty> 
+
+<stat-list> ::= <statement> `;' <stat-list> | <statement> 
+\end{grammar}
+
+\label{figure:algorithms:grammar}
+\end{figure}
+
 \remark{In a select query, both $T$ and $A$ are sequences I guess not sets.}
 %
 Figure~\ref{figure:algorithms:infrules} shows our inference rules.

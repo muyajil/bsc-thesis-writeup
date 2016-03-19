@@ -47,8 +47,7 @@ The Traffic Cop first analyzes the query to classify it either as a {utility que
 %
 For instance, \texttt{SELECT}, \texttt{DELETE}, and \texttt{UPDATE} are all non-utility queries. 
 %
-After determining the type the Traffic Cop forwards utility queries to the \emph{Utility Command} module, which checks the authorization of the query and, if the query is authorized, execute it.
-
+After determining the type the Traffic Cop forwards utility queries to the \emph{Utility Command} module, which checks the authorization of the query and, if the query is authorized, executes it.
 
 Non-utility commands are forwarded to the \emph{Rewrite Query} module.
 %
