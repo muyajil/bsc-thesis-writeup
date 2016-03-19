@@ -52,7 +52,10 @@ After determining the type the Traffic Cop forwards utility queries to the \emph
 
 Non-utility commands are forwarded to the \emph{Rewrite Query} module.
 %
-Here the query is rewritten according to the \emph{PostgreSQL Rule System}, which is a collection of rules on how to rewrite queries, such that they are optimized for PostgreSQL. \remark{Unclear}
+Here the query is rewritten according to the \emph{PostgreSQL Rule System}.
+%
+The PostgreSQL Rule System is a collection of rules on how to rewrite queries, such that the later modules of the Backend can optimize the query as good as possible.
+The Rule System, for instance, expands views to their respective definition, allowing the Generate Paths module to produce more comprehensive execution paths.
 %
 After that the rewritten query is passed to the \emph{Generate Paths} module.
 %
@@ -84,8 +87,12 @@ The functions making these decisions, however also prepare the system for the up
 Due to the distribution and inconsistency of the access control mechanism, there is no uniform interface that can be called for such a decision.
 %
 Furthermore  the mechanism is, at some points, closely connected to the internals of the database, making the implementation of a new mechanism nearly impossible without refactoring the code.
-
-\remark{more information on this?}
+%
+For instance, checking the authorization of \texttt{SELECT} queries is done very late, namely in the executor.
+%
+This check is on an internal datastructure that represents the tables referenced in the query.
+%
+Therefore we need to modify the behaviour of the executor just to modify the way \texttt{SELECT} queries are authorized.
 
 %
 \FloatBarrier
@@ -115,23 +122,50 @@ The structs used in the interface are extensible. For each type of query there i
 The structs look as follows:
 \begin{lstlisting}[frame=single, style=customc]
 union ac_return_data_struct {
-	Oid target_namespace; /* Returned if CREATE is authorized */
-	AclMode current_privileges; /* Returned if GRANT is authorized */
-	bool execute; /* Returned for Non-utility query */
+	/* Returned if CREATE is authorized otherwise NULL*/
+	Oid target_namespace; 
+	/* Returned if GRANT is authorized otherwise NULL*/
+	AclMode current_privileges; 
+	/* Returned for Non-utility query */
+	bool execute; 
 };
 
 struct ac_decision_data_struct {
+	/* Tag identifying query */
 	command_type command;
-	ac_create_relation_data *create_relation_data; /* If (command == CREATE_RELATION) this cannot be NULL */
-	ac_grant_data *grant_data; /* If (command == GRANT || command == REVOKE) this cannot be NULL */
-	ac_nutility_data *nutility_data; /* If (command == INSERT || command == DELETE || command == SELECT) this cannot be NULL */
-	ac_create_trigger_data *create_trigger_data; /* If (command == CREATE_TRIGGER) this cannot be NULL */
+	/* If (command == CREATE_RELATION) this cannot be NULL */
+	ac_create_relation_data *create_relation_data; 
+	/* If (command == GRANT || command == REVOKE) this cannot be NULL */
+	ac_grant_data *grant_data; 
+	/* If (command == INSERT || command == DELETE || command == SELECT) this cannot be NULL */
+	ac_nutility_data *nutility_data; 
+	/* If (command == CREATE_TRIGGER) this cannot be NULL */
+	ac_create_trigger_data *create_trigger_data; 
 };
 \end{lstlisting}
 %
 Further each field in the decision data struct is actually a pointer that refers to a struct, that in turn holds all information needed for deciding if the respective type of query is authorized.
 %
-\remark{Add some more information?}
+For instance the struct that is required to check the authorization of \texttt{GRANT} or \texttt{REVOKE} queries looks as follows:
+%
+\begin{lstlisting}[frame=single, style=customc]
+/* Data needed for deciding on GRANT queries */
+struct ac_grant_data_struct {
+	bool is_grant;
+	AclMode avail_goptions;
+	bool all_privs;
+	AclMode privileges;
+	Oid objectId;
+	Oid grantorId;
+	AclObjectKind objkind;
+	const char *objname;
+	AttrNumber att_number;
+	const char *colname;
+};
+\end{lstlisting}
+%
+This structure actually represents the argument list the original function that authorizes \texttt{REVOKE} and \texttt{GRANT} queries.
+%
 Any function that calls this interface will pass all the data needed to make the decision.
 %
 Depending on the data received, the interface internally calls the functions that were previously distributed among the modules.
@@ -140,10 +174,36 @@ This allows for future developers to gradually implement a new algorithm, by ide
 %
 To facilitate the identification of the query received we have included an additional field in the decision data, which tells exactly what type of query was received by the interface, i.e., \texttt{INSERT} or \texttt{UPDATE} instead of just identifying it as a non-utility query.
 
-\remark{This part is unclear. Why do we need the stack? What is its purpose? What information is on the stack?}
 Further we added a stack that at any point of the execution of the database system, holds all queries that are not yet completed.
 %
 This allows developers to always have a clear view on the state of the database system.
+%
+The top element of the stack represents the currently executing query.
+%
+Elements are popped from the stack after the database transaction is completed.
+%
+Each element is a struct that looks as follows:
+%
+\begin{lstlisting}[frame=single, style=customc]
+/* Data structure representing context */
+struct ac_context_struct{
+	Oid user;
+	Oid invoker;
+	Query *query;
+	const char *query_string;
+	bool authorized;
+	bool rewritten;
+	bool authorizesnext;
+};
+\end{lstlisting}
+%
+For one a context contains the session user that is connected to the database, further it also contains the \emph{invoker} of the query.
+%
+The invoker is relevant if the query is executed under other privileges than the ones of the session user, this happens for instance when a trigger is executed under \emph{owner's privileges}, which means under the privileges of the user that created the trigger.
+%
+Further a context also contains the query in text form and as a parsed abstract syntax tree.
+%
+Also we included three boolean values: ``authorized'' indicates if the query is authorized, ``rewritten'' tells us if the query was rewritten as part of the access control mechanism, and ``authorizesnext'' is used if the query authorizes the query that is below in the context stack.
 %
 The stack is used to simplify the implementation of novel mechanisms such as the one in~\cite{guarnieri2016strong}, since the algorithm from Guarnieri et. al requires knowledge about other aspects of the system such as triggers being executed, or nested queries.
 %
