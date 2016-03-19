@@ -121,7 +121,7 @@ For each query $Q$ the rewriting algorithm produces a secure over-approximation 
 %
 The extended rule set is used to create two mappings within the database.
 %
-We map all tables or view $T$ to the set $T^\bot$, which contains all tables or views that contain $T$ based on the above inference rules.
+We map all tables or views $T$ to the set $T^\bot$, which contains all tables or views that contain $T$ based on the above inference rules.
 %
 In the same way we map each table or view $T$ to the set $T^\top$, which contain all tables or views that are contained by $T$.
 %
@@ -129,7 +129,7 @@ Here we use these mappings to provide the same rewriting as in~\cite{guarnieri20
 
 \subsubsection{Rewriting Algorithm}
 %
-Algorithm~\ref{alg:algorithms:rewrite} shows an pseudo code of the implementation.
+Algorithm~\ref{alg:algorithms:rewrite} shows a pseudo code of the implementation.
 %
 The rewriting algorithm returns the two queries $Q^\bot$ and $Q^\top$.
 %
@@ -137,7 +137,7 @@ The query $Q^\bot$ is built by replacing each referenced table $T$ by the inters
 %
 $Q^\top$ is built analogously with unions of all the tables $\tau \in T^\top$.
 %
-We further define the helper function \emph{$S$.hasNext()}, which returns true if the table $\tau$ is the last one in the set $S$ and false otherwise.
+We further define the helper function \emph{$S$.hasNext()}, which returns false if the table $\tau$ is the last one in the set $S$ and true otherwise.
 %
 Therefore it is trivial that both queries $Q^\bot$ and $Q^\top$ are secure, since all the tables referenced within are readable to the user issuing the query.
 %
