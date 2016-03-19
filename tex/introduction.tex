@@ -1,107 +1,43 @@
 \section{Introduction}
-
-\remark{start alternative}
-
-
-
 To protect the confidentiality of sensitive information stored in databases, it is essential to restrict access to the data.
 %
 For this, the SQL standard defines an access control model, and existing Database Management Systems (DBMSs) have accordingly implemented it. 
 %
-One of the principal tasks of database access control mechanisms is to check the security of the \texttt{SELECT} queries issued by the users.
+One of the main tasks of database access control mechanisms is to check whether \texttt{SELECT} queries issued by the users are secure.
 %
-This is \emph{essential} to effectively secure database system and prevent the disclosure of sensitive information.
-%
+This is \emph{essential} to effectively secure database systems and prevent the leakage of sensitive information.
 
-The access control mechanism for \texttt{SELECT} queries provided by the SQL standard is rather simple and naive.
+The access control mechanism implemented in PostgreSQL is rather simple.
 %
-It decides whether a \texttt{SELECT} query is authorized just by performing simple syntactic checks.
+It just analyzes the syntax of submitted \texttt{SELECT} queries.
 %
-Namely, a query is authorized if the user issuing it can read all the tables and views referred in the query.
+Namely, a \texttt{SELECT} query is deemed secure if all the tables and views referenced in it are readable to the user issuing the query, according to the access control policy.
 %
-This mechanism  is overly restrictive.
+This mechanism is overly restrictive.
 %
 Indeed, as already identified in~\cite{...}, even queries not satisfying this criterion are secure.
-%   
-%As a result, it cannot be used as a building block of strong access control mechanisms, such as the one in~\cite{guarnieri2016strong}.
-%%
-%This is why Guarnieri et al.~\cite{guarnieri2016strong} developed a novel algorithm for deciding the security of \texttt{SELECT} queries.\footnote{In~\cite{guarnieri2016strong}, Guarnieri et al. refer to this algorithm as the \emph{secure} procedure, which can be used to determine the security of any relational calculus sentence.}  
 
-As shown by the database access control mechanism developed by Guarnieri et al.~\cite{guarnieri2016strong}, sub-routines for checking the security of \texttt{SELECT} queries are also one of the main building blocks of powerful and strong access control mechanisms that prevent attacks that thwart SQL mechanisms.
-%
-This requires, however, algorithms that are, at the same time, both efficient and permissive in order to keep the overall database system still usable.
-%
-Motivated by this,  Guarnieri et al.~\cite{guarnieri2016strong} developed a novel algorithm for deciding the security of \texttt{SELECT} queries.\footnote{In~\cite{guarnieri2016strong}, Guarnieri et al. refer to this algorithm as the \emph{secure} procedure, which can be used to determine the security of any relational calculus sentence.} 
-
-
-The mechanism proposed by Guarnieri et al.~\cite{guarnieri2016strong} has two main practical limitations.
-%
-First, it is based on the relational calculus, whereas existing DBMSs are based on SQL.
-%
-Despite SQL is inspired by the relational calculus, it differs from it in significant ways.
-%
-For instance, they differ in their syntax and semantics, e.g., SQL uses a bag semantics whereas the relational calculus relies on a set-based semantics.
-%
-Second, it is defined primarily for boolean queries, whereas \texttt{SELECT} queries, in general, retrieve tuples.
-%
-Even though boolean queries can be used to encode the result of non-boolean queries, this encoding may introduce an exponential  \remark{double check!} blow-up in the formula's size.
-%
-
-Motivated by idea of extending Guarnieri et al. mechanism~\cite{guarnieri2016strong} to the entire SQL language, in this thesis we develop a novel algorithm for checking the security of \texttt{SELECT} queries.
-%
-Our algorithm extends the one given in~\cite{guarnieri2016strong} to the SQL language and is more permissive than the one presented in the SQL standard.
-...
-...
-
-
-%
-%Thus, extending Guarnieri et al.'s mechanism to SQL poses several challenges,i.e, SQL and relational algebra differ in syntax and semantics, e.g., SQL uses a bag semantics whereas the relational algebra is based on sets, and it is crucial to effectively secure state-of-the-art DBMSs.
-
-\remark{End alternative}
-
-
-To protect the confidentiality of sensitive information stored in databases, it is essential to restrict access to the data.
-%
-For this, the SQL standard defines an access control model, and existing Database Management Systems (DBMSs) have accordingly implemented it. 
-%
-This model successfully regulates \emph{direct access}, i.e., through \texttt{SELECT} queries, to the data. It, however, fails in preventing \emph{indirect access} to sensitive data.
-%
-Namely, attackers can exploit advanced database features, such as triggers and views, as well as the DBMS' semantics to infer sensitive information from sequences of authorized commands~\cite{guarnieri2016strong}.
-%
-
-%
 Recently, Guarnieri et al.~\cite{guarnieri2016strong} investigated the limitations of this access control model. 
 %
-They identified severe attacks threatening the confidentiality and integrity of the data stored in DBMSs. 
+They developed a novel, more secure, access control mechanism.
 %
-Namely, attackers can exploit advanced database features, such as triggers and views, as well as the DBMS' semantics to infer sensitive information from sequences of authorized commands and to perform unauthorized changes to the database~\cite{guarnieri2016strong}.
-% 
-To address these attacks, they developed 
+This access control mechanism shows that sub-routines for checking the security of \texttt{SELECT} queries are also one of the main building blocks of strong access control mechanisms such as the one proposed.
 %
-(1) a formal framework, consisting of an operational semantics and attacker model as well as precise security properties, to reason about the precise security guarantees provided by database access control mechanisms, and 
+The mechanism however also requires that these routines are more permissive and efficient, to keep the overall database system still usable.
 %
-(2) an access control mechanism that provably prevents these attacks.
-%
-This access control mechanism prevents the attacks by introducing more comprehensive and frequent security checks during the execution of the database system.
-%
-One building block of this algorithm is a new mechanism to decide the authorization of \texttt{SELECT} queries that is more permissive than the current standard, but offers the same level of security.
+Motivated by this Guarnieri et al. developed such a routine for checking the security of \texttt{SELECT} statements.
 
-The mechanism proposed by Guarnieri et al., has several limitations in practice.
+The routine proposed in~\cite{guarnieri2016strong} however, has two main practical limitations.
 %
-For one the formulated model is based on the relational calculus. 
+First, it is based on the relational calculus, whereas existing DBMSs are based on SQL. Despite SQL being inspired by the relational calculus it differs from it in significant ways. For instance, they differ in their syntax and semantics, e.g., SQL uses a bag semantics whereas the relational calculus relies on a set-based semantics.
 %
-Existing Database Management Systems (DBMSs), however, are based on SQL.
+Second, it is defined primarily for boolean queries, whereas \texttt{SELECT} queries usually retrieve tuples.
 %
-Despite SQL is inspired by the relational calculus, it differs from it in significant ways.
+Even though boolean queries can be used to encode the result of non-boolean queries, this encoding may introduce a extreme blow-up in the formula's size.
+
+Motivated by the idea of extending the mechanism from~\cite{guarnieri2016strong} to the entire SQL language, in this thesis we develop a novel algorithm for checking the security of \texttt{SELECT} queries.
 %
-Thus, extending Guarnieri et al.'s mechanism to SQL poses several challenges,i.e, SQL and relational algebra differ in syntax and semantics, e.g., SQL uses a bag semantics whereas the relational algebra is based on sets, and it is crucial to effectively secure state-of-the-art DBMSs.
-
-
-
-
-
-
-
+Our algorithm extends the one proposed by Guarnieri et al. to the SQL language and is more permissive than the one implemented in PostgreSQL.
 
 \smallskip
 \noindent
