@@ -5,15 +5,17 @@
 \contentsline {subsection}{\numberline {3.2}Implementation in PostgreSQL}{5}{subsection.3.2}
 \contentsline {section}{\numberline {4}Architecture}{7}{section.4}
 \contentsline {subsection}{\numberline {4.1}Current architecture}{7}{subsection.4.1}
-\contentsline {subsection}{\numberline {4.2}Refactoring}{9}{subsection.4.2}
-\contentsline {section}{\numberline {5}Algorithms}{10}{section.5}
-\contentsline {subsection}{\numberline {5.1}Query Containment}{10}{subsection.5.1}
-\contentsline {subsubsection}{\numberline {5.1.1}Query Containment Approximation}{10}{subsubsection.5.1.1}
-\contentsline {subsection}{\numberline {5.2}Checking security of \texttt {SELECT} queries}{11}{subsection.5.2}
-\contentsline {subsubsection}{\numberline {5.2.1}Rewriting Algorithm}{12}{subsubsection.5.2.1}
-\contentsline {subsubsection}{\numberline {5.2.2}Authorization of \texttt {SELECT} queries}{14}{subsubsection.5.2.2}
-\contentsline {section}{\numberline {6}Experiments}{15}{section.6}
-\contentsline {section}{\numberline {7}Related Work}{16}{section.7}
-\contentsline {section}{\numberline {8}Conclusion}{17}{section.8}
-\contentsline {section}{\numberline {A}Appendix}{18}{appendix.A}
-\contentsline {section}{References}{19}{appendix.A}
+\contentsline {subsubsection}{\numberline {4.1.1}Backend architecture}{7}{subsubsection.4.1.1}
+\contentsline {subsubsection}{\numberline {4.1.2}Access Control}{10}{subsubsection.4.1.2}
+\contentsline {subsection}{\numberline {4.2}Refactoring}{10}{subsection.4.2}
+\contentsline {section}{\numberline {5}Algorithms}{12}{section.5}
+\contentsline {subsection}{\numberline {5.1}Query Containment}{12}{subsection.5.1}
+\contentsline {subsubsection}{\numberline {5.1.1}Query Containment Approximation}{12}{subsubsection.5.1.1}
+\contentsline {subsection}{\numberline {5.2}Checking security of \texttt {SELECT} queries}{13}{subsection.5.2}
+\contentsline {subsubsection}{\numberline {5.2.1}Rewriting Algorithm}{14}{subsubsection.5.2.1}
+\contentsline {subsubsection}{\numberline {5.2.2}Authorization of \texttt {SELECT} queries}{16}{subsubsection.5.2.2}
+\contentsline {section}{\numberline {6}Experiments}{17}{section.6}
+\contentsline {section}{\numberline {7}Related Work}{18}{section.7}
+\contentsline {section}{\numberline {8}Conclusion}{19}{section.8}
+\contentsline {section}{\numberline {A}Appendix}{20}{appendix.A}
+\contentsline {section}{References}{21}{appendix.A}
