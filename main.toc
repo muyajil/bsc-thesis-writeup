@@ -3,6 +3,7 @@
 \contentsline {section}{\numberline {3}Background}{5}{section.3}
 \contentsline {subsection}{\numberline {3.1}SQL access control model}{5}{subsection.3.1}
 \contentsline {subsection}{\numberline {3.2}Implementation in PostgreSQL}{5}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}Algorithm proposed by Guarnieri et al.}{6}{subsection.3.3}
 \contentsline {section}{\numberline {4}Architecture}{7}{section.4}
 \contentsline {subsection}{\numberline {4.1}Current architecture}{7}{subsection.4.1}
 \contentsline {subsubsection}{\numberline {4.1.1}Backend architecture}{7}{subsubsection.4.1.1}

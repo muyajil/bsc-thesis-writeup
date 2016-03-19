@@ -6,43 +6,63 @@ The conclusions made in the following paragraphs are backed by an analysis of th
 
 \subsection{SQL access control model}
 
-\remark{I'd first start by outlining the SQL access control model. There are privileges. Privileges are assigned/revoked using \texttt{GRANT} and \texttt{REVOKE} commands. This kind of things :-) This is essential to understand the rest (e.g., what are ACLs? how are they defined? what are the roles?)}
-
 In the SQL access control model database users have privileges. 
-%
-Each privilege represents an op
 %
 Each privilege represents an operation that can be done in the database, such as, creating tables, creating triggers, update tables etc.
 %
 The privileges can be assigned using \texttt{GRANT} and revoked using \texttt{REVOKE}.
 %
-However the user issuing these queries, must have the privilege assigned to him.
+However the user issuing these queries, must have the privilege to delegate privileges to other users.
 %
-This generally is the database administrator.
+At the beginning of the execution of a DBMS this is the database administrator.
 %
-Privileges can 
+Privileges can be assigned either to the database or to a \emph{database object}.
+%
+A database object refers to an internal structure of the database, such as tables, triggers, views etc.
+%
+Further, privileges are encoded using \emph{access control lists} (ACLs). 
+%
+Each ACL specifies the privileges for each \emph{database role}.
+%
+A database role can be one of public, group of database users, or a single database user.
+%
+Groups of database users are used to manage privileges in bulk for users that enjoy similar privileges.
+%
+When a user creates a database object, he is the owner of the object and therefore intrinsically receives all privileges on this object, including the privilege to delegate those to other users.
 
 \subsection{Implementation in PostgreSQL}
-The administrator has to define an access control policy for the database. 
+
+The implementation in PostgreSQL follows the SQL standard to large extents. 
 %
-This policy defines how users can interact with the system.
+There are however subtle differences between the former and the latter.
 %
-A database object \remark{What is a db. object?} can refer to any structure within a database: tables, views, triggers, functions etc.
+For instance in the SQL standard triggers are defined as separate SQL queries, which are executed in response to regular queries issued by users.
 %
-For each object the administrator has to define \emph{access control lists} (ACLs) for each database role.
+PostgreSQL however offers the possibility to execute, among others, C functions as triggers.
 %
-The administrator can define an ACL for the public, a group\remark{,} or a user. 
+This requires a different implementation.
 %
-These ACLs then define the privileges to a database object for a database role.
+Therefore in PostgreSQL triggers are actually just references to functions, in more detail, a trigger consists of a condition and a function.
 %
-The privileges among others include creation of tables, views or triggers in the database or reading, altering or deleting of tuples from tables or views.
+If during the execution of a user submitted query the condition is satisfied, the function is executed.
 %
-These privileges can be modified using \texttt{GRANT} or \texttt{REVOKE} commands, whereas the execution of those is also based on the ACLs \remark{the last part is a bit unclear}.
+Therefore the access control mechanism needs to handle the execution of functions differently.
 %
-The possible privileges include insert, update, select, create, execute etc.\footnote{\url{http://www.postgresql.org/docs/9.5/static/sql-grant.html}}
+If a user creates a trigger in the SQL standard he only needs the privilege to create triggers.
 %
-Depending on the object different privileges are applicable. 
+In PostgreSQL however the user needs the privilege to create triggers and the execution privilege on the function he wants to execute with the trigger.
 %
-For example the execution privilege is only applicable to functions and triggers, whereas the insert privilege is only applicable to tables or views.
+If however the execution privilege on the function is revoked, the trigger stays intact.
+
+When users submit queries to the database system, depending on the type of the query, an internal function is calles, which among other things, retrieves the ACL for objects that are referenced in the query and checks the privileges.
 %
-When issuing a query to the database, depending on the query, a function is executed which, among other things, retrieves the ACL for the objects referenced in the query and checks if the required privileges are available for the user issuing the command.
+Then the function will, according to the retrieved ACL either authorize the query or not.
+
+\subsection{Algorithm proposed by Guarnieri et al.}
+
+As mentioned in Chapter 1 Guarnieri et al. have devised a new access control mechanism.
+%
+One key component of this mechanism is deciding if boolean queries in the relational calculus are secure with respect to the access control policy.
+%
+\remark{how deep should I go here? Should I try to explain security of judgements, or keep an overview and talk about resulting tuples from queries?}
+%
