@@ -26,24 +26,28 @@ Let $T_i$ denote sequences of tables, $A_i$ sequences of attributes within table
 
 \begin{figure}[!ht]
 
-\begin{grammar}
-<statement> ::= <ident> `=' <expr> 
-\alt `for' <ident> `=' <expr> `to' <expr> `do' <statement> 
-\alt `{' <stat-list> `}' 
-\alt <empty> 
+\begin{tabular}{c c l}
+$A$ & $:=$ & Attributes \\
+    & & \\
+$T$ & $:=$ & Relation $|$ View \\
+    & & \\
+$\phi$ & $:=$ & Boolean expression over attributes $|$ $\top$ \\
+    & & \\
+$Q$ & $:=$ & \texttt{SELECT $A$ FROM $T$ WHERE $\phi$} \\
+    & $|$  & $Q$ \texttt{UNION} $Q$ \\
+    & $|$  & $Q$ \texttt{INTERSECTION} $Q$ \\
+    & $|$  & $Q$ \texttt{EXCEPT} $Q$ \\
 
-<stat-list> ::= <statement> `;' <stat-list> | <statement> 
-\end{grammar}
+\end{tabular}
 
+\caption{Grammar of \texttt{SELECT} queries}
 \label{figure:algorithms:grammar}
 \end{figure}
-
-\remark{In a select query, both $T$ and $A$ are sequences I guess not sets.}
+%
+Further we define $w(Q)$ as a function which returns the \texttt{WHERE} clause of the \texttt{SELECT} query $Q$.
 %
 Figure~\ref{figure:algorithms:infrules} shows our inference rules.
-
-\remark{We already discussed this yesterday. $Q$ must be any query (even stuff of the form $Q_1 \cup Q_2$). Just give a grammar defining all the queries we are interested in.}
-
+%
 \begin{figure}[!ht]
 \[
 \infer[\text{ID}]
@@ -51,14 +55,13 @@ Figure~\ref{figure:algorithms:infrules} shows our inference rules.
 	{}
 \qquad	
 \infer[\text{AND}]
-	{Q_1 \land \psi \subseteq Q_1}
-	{}
+	{Q_1 \subseteq Q_2}
+	{w(Q_2) = w(Q_1) \land \phi}
 \qquad
 \infer[\text{OR}]
-	{Q_1 \subseteq Q_1 \lor \psi}
-	{}
+	{Q_1 \subseteq Q_2}
+	{w(Q_1) = w(Q_2) \lor \phi}
 \]
-\remark{Are $Q_1 \lor \psi$ and $Q_1 \land \psi$ queries?? }
 
 \[
 \infer[\text{PROJ1}]
@@ -191,8 +194,10 @@ Using the inference rules we can further show that for any query $Q$ it holds th
 	\KwData{Query $Q$, user $u$}
 	\KwResult{Rewritten queries $Q^\top$, $Q^\bot$}
 	$Q^\bot$ = $Q$\;
+	$Q^\top$ = $Q$\;
 	\ForEach{table $T$ referenced in $Q$}{
 		$T'$ = "("\;
+		$T''$ = "("\;
 		\ForEach{table $\tau$ in $T^\bot$}{
 			\If{$u$ is authorized to read $\tau$}
 				{\eIf{$T^\bot$.hasNext()}
@@ -200,25 +205,21 @@ Using the inference rules we can further show that for any query $Q$ it holds th
 					{$T'$ += "\texttt{(SELECT * FROM $\tau$)}"\;}
 				}
 		}
-		$T'$ += "\texttt{) AS $T$}"\;
-     	Replace $T$ with $T'$ in $Q^\bot$\;
-     }
-    
-    $Q^\top$ = $Q$\;
-	\ForEach{table $T$ referenced in $Q$}{
-		$T'$ = "("\;
+     	
 		\ForEach{table $\tau$ in $T^\top$}{
 			\If{$u$ is authorized to read $\tau$}
 				{\eIf{$T^\top$.hasNext()}
-					{$T'$ += "\texttt{(SELECT * FROM $\tau$) UNION}"\;}
-					{$T'$ += "\texttt{(SELECT * FROM $\tau$)}"\;}
+					{$T''$ += "\texttt{(SELECT * FROM $\tau$) UNION}"\;}
+					{$T''$ += "\texttt{(SELECT * FROM $\tau$)}"\;}
 				}
 		}
 		$T'$ += "\texttt{) AS $T$}"\;
-     	Replace $T$ with $T'$ in $Q^\top$\;
+		$T''$ += "\texttt{) AS $T$}"\;
+		Replace $T$ with $T'$ in $Q^\bot$\;
+     	Replace $T$ with $T''$ in $Q^\top$\;
      }
+
      \Return ($Q^\bot$, $Q^\top$)\;
-\remark{Why not merging the two loops?}
 \end{algorithm}
 
 \smallskip
