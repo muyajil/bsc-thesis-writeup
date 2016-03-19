@@ -2,173 +2,187 @@
 
 \subsection{Query Containment}
 
-The subject of query containment refers to the problem where for two queries $Q_1$ and $Q_2$ we want to answer if $Q_1$ is contained in $Q_2$ in all indistinguishable database states.
+The subject of query containment refers to the problem where for two queries $Q_1$ and $Q_2$ we want to answer if the tuples returned from $Q_1$ are always, i.e., in all database states, contained in the ones returned from $Q_2$.
 %
-\remark{introduce indistinguishability of database states}
+This problem is well-known to be undecidable for Relational Calculus and SQL.~\cite{abiteboul1995foundations}.
 %
-\remark{maybe reference to book for NP hardness.}
+\remark{Discuss its use in databases.}
 
-\remark{State the problem clearly. Give decidability results. Discuss its use in databases.}
+\subsubsection{Query Containment Approximation}
 
-\remark{
-The problem is undecidable for Relational Calculus and SQL.
+Since the decision of query containment is undecidable Guarnieri et al. have developed a rule set that produces sound under-approximations of query containment.
 %
-It is NP-hard only for conjunctive queries.
-} 
-
-\subsection{Query Containment Approximation}
-
-\remark{There is no intuition whatsoever on why we need query containment for checking security.
-%
-In the paper, we defined an algorithm for checking containment and we use it as a key component of the security check.
-%
-The algorithm is formalized using inference rules and it is an under-approximation.
-%
-The algorithm is only for relational calculus.
-%
-Here, we extend it to SQL.
-}
-
-Since the decision of query containment is \emph{NP-hard}, i.e., not decidable in polynomial time \remark{only if $P \neq NP$}, \remark{Undecidable!!}  Guarnieri et al. have developed a rule set that under-approximates query containment.
-%
-The rules were developed for the relational algebra \remark{Relational calculus}, which as mentioned before differs from SQL. 
+The rules were developed for the Relational calculus, which as mentioned before differs from SQL. 
 %
 Here we extend these rules to SQL.
 %
-In the following we present this extended rule set. \remark{Remove this sentence. It just repeats the one before.}
+Let $T_i$ denote sets of tables, $A_i$ sets of attributes within tables, $Q_i$ \texttt{SELECT} queries of the form \texttt{SELECT $A_i$ FROM $T_i$ WHERE $\phi$}, and greek letters stand for boolean expressions.
 %
-Let $T_i$ denote \remark{Sets of?} tables, $A_i$ sets of attributes within tables, $Q_i$ \texttt{SELECT} queries of the form \texttt{SELECT $A$ FROM $T$ WHERE $\phi$, and greek letters stand for boolean expressions on the tuples contained in the tables.
-%
-The inference rules consist of tuples $(u,Q)$ where $u$ is the user issuing the query $Q$.
-%
-All the following rules are only applicable if the user $u$ is allowed to read all tables or views referenced in the premiss \remark{premise}.
-%
-\remark{Containment is independent from the user. I don't see why you added this restriction. It's probably even too restrictive for our algorithm.}
+Figure~\ref{figure:algorithms:infrules} shows the extended rules.
 
-
-\remark{The rules are written in a very weird way. Who is contained in what? Look at how I've wrote the rules in the technical report.} 
-
-\remark{Put all the rules in a figure. Give them a name. Explain each rule and refer to it as ID-rule, AND-rule, etc.}
-
+\begin{figure}[!ht]
 \[
 \infer[\text{ID}]
-	{(u,\text{\texttt{SELECT $A_1$ FROM $T_1$ WHERE $\phi$}})}
-	{(u,\text{\texttt{SELECT $A_1$ FROM $T_1$ WHERE $\phi$}})}
-\]
-
-Any \texttt{SELECT} query is contained in itself.
-
-\[
+	{Q_1 \subseteq Q_1}
+	{}
+\qquad	
 \infer[\text{AND}]
-	{(u,\text{\texttt{SELECT $A_1$ FROM $T_1$ WHERE $\phi$}})}
-	{(u,\text{\texttt{SELECT $A_1$ FROM $T_1$ WHERE $\phi \land \psi$}})}
+	{Q_1 \land \psi \subseteq Q_1}
+	{}
+\qquad
+\infer[\text{OR}]
+	{Q_1 \subseteq Q_1 \lor \psi}
+	{}
 \]
-
-\remark{In principle, we need also a rule for the $\psi$'s case.}
-
-The rule holds since we weaken the condition by reducing the number of boolean expressions in the conjunction \remark{It's a bit unclear}. Therefore the tuples resulting from the query in the premiss are contained in the tuples resulting from the query in the conclusion.
-
-\[
-\infer[\text{OR1}]
-	{(u,\text{\texttt{SELECT $A_1$ FROM $T_1$ WHERE $\phi \lor \psi$}})}
-	{(u,\text{\texttt{SELECT $A_1$ FROM $T_1$ WHERE $\phi$}})}
-\]
-
-\[
-\infer[\text{OR1}]
-	{(u,\text{\texttt{SELECT $A_1$ FROM $T_1$ WHERE $\phi \lor \psi$}})}
-	{(u,\text{\texttt{SELECT $A_1$ FROM $T_1$ WHERE $\psi$}})}
-\]
-
-This rule holds since we again weaken the condition again by adding a disjunction.
 
 \[
 \infer[\text{PROJ1}]
-	{(u,\text{\texttt{SELECT $A_2$ FROM $T_1$ WHERE $\phi$}})}
-	{(u,\text{\texttt{SELECT $A_1$ FROM $T_1$ WHERE $\phi$}} \qquad A_1 \subseteq A_2)}
+	{Q_1' \subseteq Q_2'}
+	{Q_1 \subseteq Q_2 \qquad A_1 \setminus A_1' = A_2 \setminus A_2'}
+\qquad
+\infer[\text{PROJ2}]
+	{Q_1' \subseteq Q_2'}
+	{Q_1 \subseteq Q_2 \qquad T_1 \setminus T_1' = T_2 \setminus T_2'}
 \]
-
-In this rule the tuples resulting from both queries are the same since the condition in the \texttt{WHERE} clause is the same for both queries. The data however from the query in the premiss is contained in the data from the conclusion.
-
-\remark{Description is completely unclear. Moreover, the containment does not hold. 
-%
-Containment $Q_1' \subseteq Q_2'$ holds in case we already know that $Q_1 \subseteq Q_2$ and the queries $Q_1'$ and $Q_2'$ are obtained from $Q_1$ and $Q_2$ by projecting out the same attribute $A$.
-}
-
-
 
 \[
-\infer[\text{PROJ2}]
-	{(u,\text{\texttt{SELECT $A_2$ FROM $T_2$ WHERE $\phi$}})}
-	{(u,\text{\texttt{SELECT $A_1$ FROM $T_1$ WHERE $\phi$}} \qquad A_1 \subseteq A_2 \qquad T_1 \subseteq T_2)}
+\infer[\text{PROJ3}]
+	{Q_1' \subseteq Q_2'}
+	{Q_1 \subseteq Q_2 \qquad A_1 \setminus A_1' = A_2 \setminus A_2' \qquad T_1 \setminus T_1' = T_2 \setminus T_2'}
 \]
-
-Here the same argumentation holds as above. Addionally we have that the table we are querying from in the premiss is contained in the respective table in the conclusion. Therefore it is obvious that all data returned from querying $T_1$ is contained in the data returned from $T_2$.
-
-\remark{It is not obvious at all. The containment again does not hold. THere is no tuple in the first query that is contained also in the second query.}
 
 \[
 \infer[\text{INTER1}]
-	{(u,Q_1)}
-	{(u,Q_1 \text{\texttt{ INTERSECTION }} Q_2)}
-\]
-
-\[
+	{Q_2 \subseteq Q_1}
+	{Q_2 \equiv Q_1 \text{\texttt{ INTERSECTION }} Q_3}
+\qquad
 \infer[\text{INTER2}]
-	{(u,Q_2)}
-	{(u,Q_1 \text{\texttt{ INTERSECTION }} Q_2)}
+	{Q_2 \subseteq Q_1}
+	{Q_2 \equiv Q_3 \text{\texttt{ INTERSECTION }} Q_1}
 \]
-
-By the definition of intersecting two sets these rules hold trivially.
 
 \[
 \infer[\text{UNION1}]
-	{(u,Q_1 \text{\texttt{ UNION }} Q_2)}
-	{(u,Q_1)}
-\]
-
-\[
+	{Q_1 \subseteq Q_2}
+	{Q_2 \equiv Q_1 \text{\texttt{ UNION }} Q_3}
+\qquad
 \infer[\text{UNION2}]
-	{(u,Q_1 \text{\texttt{ UNION }} Q_2)}
-	{(u,Q_2)}
+	{Q_1 \subseteq Q_2}
+	{Q_2 \equiv Q_3 \text{\texttt{ UNION }} Q_1}
 \]
-
-By the definition of unifying two sets these rules hold trivially.
 
 \[
 \infer[\text{EXCEPT}]
-	{(u,Q_1)}
-	{(u,Q_1 \text{\texttt{ EXCEPT }} Q_2)}
+	{Q_2 \subseteq Q_1}
+	{Q_2 \equiv Q_1 \text{\texttt{ EXCEPT }} Q_3}
+\qquad
+\infer[\text{TRANS}]
+	{Q_1 \subseteq Q_3}
+	{Q_1 \subseteq Q_2 \qquad Q_2 \subseteq Q_3}
 \]
+\caption{Inference Rules for query containment}
+\label{figure:algorithms:infrules}
+\end{figure}
 
-This rule holds by the definition of subtracting sets.
+The ID-rule holds trivially.
+%
+In the AND-rule we restrict the resulting bag further by adding a boolean expression in conjuction. 
+%
+Therefore the rule holds.
+%
+The OR-rule holds by the same argumentation, namely we extend the resulting bag, by adding a boolean expression in disjunction, wich increases the number of tuples satisfying the \texttt{WHERE} clause.
+%
+The PROJ1-rule is valid since we project out the same set of attributes. Therefore the actual rows returned from the table are the same, with less attributes.
+%
+\remark{I am not perfectly sure about the PROJ rules}
+%
+The PROJ2-rule holds since we reduce the multiset of tuples from which we select by the same tuples in both queries.
+%
+By combining PROJ1 and PROJ2 we get the rule PROJ3.
+%
+The rules INTER1 and INTER2 hold trivially, by the definition of intersecting two multisets.
+%
+The same argumentation holds for the rules UNION1 and UNION2, which rely on the definition of unifying multisets.
+%
+The rule EXCEPT holds by the definition of subtracting multisets.
+%
+Lastly the rule TRANS holds by the definition of containment.
 
-\subsection{Rewriting of \texttt{SELECT} queries}
+\FloatBarrier
+\subsection{Checking security of \texttt{SELECT} queries}
 
-In the new algorithm one component of authorizing \texttt{SELECT} queries is the rewriting of those. \remark{Unclear}
+As seen in Chapter 2 \texttt{SELECT} queries are trivially authorized if the user that issues the query has read privileges on all the referenced tables.
 %
-The rewriting produces a new query, where the resulting set is the set of tuples equal to subtracting an under-approximation of the query from an over-approximation of the query. \remark{Unclear. Under- and Over- approximations with respect to what? Containment? These concepts have never been defined before. In SQL the result is a bag (or multiset) not a set.}
+However this mechanism is too restrictive for implementing a powerful mechanism such as the one presented in~\cite{guarnieri2016strong}.
 %
-Both the under- and the over-approximation are secure queries for the user, since they only reference tables, which the user is authorized to read.
+The authors of~\cite{guarnieri2016strong} have devised a algorithm that checks the security of queries, which relies on query containment and the rewriting of the query.
 %
-The approximations are computed based on the inference rules introduced above. \remark{No. The approximations are computed by the rewriting algorithm. The inference rules for containment are used only for computing the 
+For each query $Q$ the rewriting algorithm produces a secure over-approximation $Q^\bot$ and under-approximation $Q^\top$ with respect to query containment, using the rule set introduced above.
 %
-We define the function $\operatorname{rewrite}(Q)$, where $Q$ is a \texttt{SELECT} query of the form \texttt{SELECT $A$ FROM $T$ WHERE $\phi$}.
+The extended rule set is used to create two mappings within the database.
 %
-Further we define two functions $\operatorname{under}(Q)$ and $\operatorname{over}(Q)$,  where $Q$ is passed from $\operatorname{rewrite}$. \remark{Unclear. What is \texttt{operatorname}?}
+We map all tables or view $T$ to the set $T^\bot$, which contains all tables or views that contain $T$ based on the above inference rules.
 %
-These two functions return a query that is an over- respectively under-approximation. \remark{Again. With respect to what?}
+In the same way we map each table or view $T$ to the set $T^\top$, which contain all tables or views that are contained by $T$.
+%
+Here we use these mappings to provide the same rewriting as in~\cite{guarnieri2016strong}, but for SQL.
 
-\remark{where are the function?}
+\subsubsection{Rewriting Algorithm}
+%
+Algorithm~\ref{alg:algorithms:rewrite} shows an pseudo code of the implementation.
+%
+The rewriting algorithm returns the two queries $Q^\bot$ and $Q^\top$.
+%
+The query $Q^\bot$ is built by replacing each referenced table $T$ by the intersection of all the tables $\tau \in T^\bot$ that the user is authorized to read.
+%
+$Q^\top$ is built analogously with unions of all the tables $\tau \in T^\top$.
+%
+We further define the helper function \emph{$S$.hasNext()}, which returns true if the table $\tau$ is the last one in the set $S$ and false otherwise.
+%
+Therefore it is trivial that both queries $Q^\bot$ and $Q^\top$ are secure, since all the tables referenced within are readable to the user issuing the query.
+%
+Using the inference rules we can further show that for any query $Q$ it holds that $Q^\top \subseteq Q \subseteq Q^\bot$.
+%
+\begin{algorithm}
+\caption{Rewriting Algorithm for SQL queries}
+\label{alg:algorithms:rewrite}
+	\SetAlgoLined
+	\KwData{Query $Q$, user $u$}
+	\KwResult{Rewritten queries $Q^\top$, $Q^\bot$}
+	$Q^\bot$ = $Q$\;
+	\ForEach{table $T$ referenced in $Q^\bot$}{
+		$T'$ = "("\;
+		\ForEach{table $\tau$ in $T^\bot$}{
+			\If{$u$ is authorized to read $\tau$}
+				{\eIf{$T^\bot$.hasNext()}
+					{$T'$ += "\texttt{(SELECT * FROM $\tau$) INTERSECTION}"\;}
+					{$T'$ += "\texttt{(SELECT * FROM $\tau$)}"\;}
+				}
+		}
+		$T'$ += "\texttt{) AS $T$}"\;
+     	Replace $T$ with $T'$ in $Q^\bot$\;
+     }
+    
+    $Q^\top$ = $Q$\;
+	\ForEach{table $T$ referenced in $Q^\top$}{
+		$T'$ = "("\;
+		\ForEach{table $\tau$ in $T^\top$}{
+			\If{$u$ is authorized to read $\tau$}
+				{\eIf{$T^\top$.hasNext()}
+					{$T'$ += "\texttt{(SELECT * FROM $\tau$) UNION}"\;}
+					{$T'$ += "\texttt{(SELECT * FROM $\tau$)}"\;}
+				}
+		}
+		$T'$ += "\texttt{) AS $T$}"\;
+     	Replace $T$ with $T'$ in $Q^\top$\;
+     }
+     \Return ($Q^\bot$, $Q^\top$)\;
+\end{algorithm}
 
 \smallskip
 \noindent
-{$\mathbf{ \mathrm{\bf over}(Q)}$:}
-%
-In this function we first build an inference forest that includes all possible inference trees from the rules introduced above. \remark{undefined concepts}
-%
-\remark{First give a precise algorithm. Afterwards, explain the algorithm with the example.}
-As an example recall the database setup from the motivating example:
+{\bf Example:}
+Recall the database setup from Chapter 2:
 \\
 Consider a database with tables \texttt{Programmers}, \texttt{Clerks}, and \texttt{HR}, containing the information of employees of the respective departements.
 %
@@ -182,82 +196,56 @@ Further the database contains the following views:
 %
 Assume that there is a database user $u$ which has read access to all views, but does not have read access to the tables.
 %
-The user $u$ wants to find out who is employed as a Programmer and issues the following query $Q := $ \texttt{SELECT * FROM Programmers}. 
+The user $u$ wants to find out who is employed as a Programmer and issues the following query $Q := $ \texttt{SELECT * FROM Programmers}.
 %
-Below see the inference forest produced by $\operatorname{over}(Q)$
-
-\[
-\infer[\text{INTER1}]
-	{\text{\texttt{ SELECT * FROM Programmers}}}
-	{
-		\infer[ID]
-		{\text{\texttt{ (SELECT * FROM Programmers) UNION (SELECT * FROM Clerks)}}}
-		{\text{\texttt{ SELECT * FROM ProgrammerOrClerk}}}
-	}
-\]
-
-\[
-\infer[\text{INTER2}]
-	{\text{\texttt{ SELECT * FROM Programmers}}}
-	{
-		\infer[ID]
-		{\text{\texttt{ (SELECT * FROM Programmers) UNION (SELECT * FROM HR)}}}
-		{\text{\texttt{ SELECT * FROM ProgrammerOrHR}}}
-	}	
-\]
-
-After that $\operatorname{over}(Q)$ produces a new query $Q^\bot$, which is the intersection of all leaves of the inference forest: 
+The mappings that are computed for the table \texttt{Programmers} before the rewriting algorithm look as follows:
+\begin{itemize}
+	\item $T^\bot = \lbrace \text{\texttt{ProgrammerOrClerk}, \texttt{ProgrammerOrHR}} \rbrace$
+	\item $T^\top = \lbrace \text{\texttt{YoungProgrammers}, \texttt{OldProgrammers}} \rbrace$
+\end{itemize}
 %
-The query $Q^\bot$ is then returned to rewrite.
+Therefore the rewriting algorithm will return the following queries:
+\begin{itemize}
+	\item $Q^\bot$ = \texttt{SELECT * FROM ((SELECT * FROM ProgrammerOrClerk) INTERSECTION (SELECT * FROM ProgrammerOrHR)) AS Programmer}
+	\item $Q^\top$ = \texttt{SELECT * FROM ((SELECT * FROM YoungProgrammers) UNION (SELECT * FROM OldProgrammers)) AS Programmer}
+\end{itemize}
 
-\smallskip
-\noindent
-{$\mathbf{ \mathrm{\bf under}(Q)}$:}
-The function $\operatorname{under}(Q)$ is implemented analogously, and returns the query $Q^\top$, which is the \texttt{UNION} of all leaves in the inference forest. Below see the inference forest produced by $\operatorname{under}(Q)$:
+\subsubsection{Authorization of \texttt{SELECT} queries}
 
-\[
-\infer[\text{AND}]
-	{\text{\texttt{ SELECT * FROM Programmers}}}
-	{
-		\infer[ID]
-		{\text{\texttt{ SELECT * FROM Programmers WHERE Age > 40}}}
-		{\text{\texttt{ SELECT * FROM OldProgrammers}}}
-	}	
-\]
-
-\[
-\infer[\text{AND}]
-	{\text{\texttt{ SELECT * FROM Programmers}}}
-	{
-		\infer[ID]
-		{\text{\texttt{ SELECT * FROM Programmers WHERE Age <= 40}}}
-		{\text{\texttt{ SELECT * FROM YoungProgrammers}}}
-	}
-\]
-\noindent
-It is possible to have a better under-approximation by applying the rules PROJ1 and PROJ2. In this example however the above forest is a good enough approximation.
-
-After that the function $\operatorname{rewrite}(Q)$ returns the query \texttt{$Q^\bot$ EXCEPT $Q^\top$}.
-\remark{Why?}
-
-\subsection{Authorization of \texttt{SELECT} queries}
-
-In the example previously introduced a motivating example \remark{In Chapter X}, we showed that the current access control mechanism implemented in PostgreSQL \remark{is }too restrictive to be used, in practice, with powerful access control mechanisms such as the one in the paper.
+As we have seen before the both the over- and under-approximation are secure according to the current SQL standard, since all the referenced tables in those queries are readable to the user issuing the query.
 %
-Here, we develop a new mechanism, which relies on query containment and the rewriting function introduced above.
+We have further seen that the inclusions $Q^\top \subseteq Q$ and $Q \subseteq Q^\bot$ hold for the rewritten queries $Q^\top$ and $Q^\bot$.
 %
-For each query $Q$ we will execute the function $\operatorname{rewrite}(Q)$.
+The authorization algorithm for \texttt{SELECT} queries is shown in figure~\ref{alg:algorithms:auth}
 %
-The returned query will then be executed.
+For each \texttt{SELECT} query $Q$ the algorithm uses the rewrite function introduced above to obtain the approximations $Q^\bot$ and $Q^\top$.
 %
-$Q$ will be authorized if the result is \texttt{NULL}. \remark{I guess the result is $\emptyset$, not null.}
-
-\remark{Why is this a good criterion for security? What does this section add to the story?}
+After that the algorithm checks if the tuples returned by $Q^\bot$ and $Q^\top$ are the same, by executing the query $Q'$ = $Q^\bot$ + "\texttt{EXCEPT}" + $Q^\top$ and checking if it returns $\emptyset$.
+%
+If this is the case, we know that $Q^\bot \subseteq Q^\top$.
+%
+Further we know that $Q^\top \subseteq Q$ and $Q \subseteq Q^\bot$, which leads to the conclusion that $Q^\top = Q = Q^\bot$.
+%
+Since both $Q^\bot$ and $Q^\top$ are secure, we can argue that $Q$ is secure as well and authorize it.
+%
+\begin{algorithm}
+\caption{Authorization algorithm for \texttt{SELECT} queries}
+\label{alg:algorithms:auth}
+	\SetAlgoLined
+	\KwData{Query $Q$, user $u$}
+	\KwResult{$\top$ or $\bot$}
+	($Q^\bot$, $Q^\top$) = rewrite($Q$)\;
+	$Q'$ = $Q^\bot$ + "\texttt{EXCEPT}" + $Q^\top$\;
+	$R$ = executeQuery($Q'$)\;
+	\eIf{$R$ == $\emptyset$}
+		{\Return $\top$ \;}
+		{\Return $\bot$ \;}
+\end{algorithm}
 
 \smallskip
 \noindent
 {\bf Example:}
-From the example above $\operatorname{rewrite}(Q)$ will return the following query:
+From the example above the authorization algorithm will execute the following query:
 \begin{verbatim}
 ((SELECT * FROM ProgrammerOrHR) INTERSECTION
  (SELECT * FROM ProgrammerOrClerk))
@@ -266,4 +254,4 @@ From the example above $\operatorname{rewrite}(Q)$ will return the following que
  (SELECT * FROM OldProgrammer))
 \end{verbatim}
 \noindent
-It is obvous that the query will return \texttt{NULL}, therefore the algorithm will authorize the query $Q = $ \texttt{SELECT * FROM Programmer} $\blacksquare$.
+It is obvous that the query will return $\emptyset$, therefore the algorithm will authorize the query $Q = $ \texttt{SELECT * FROM Programmer} $\blacksquare$.

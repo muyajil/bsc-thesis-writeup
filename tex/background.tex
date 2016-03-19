@@ -8,6 +8,20 @@ The conclusions made in the following paragraphs are backed by an analysis of th
 
 \remark{I'd first start by outlining the SQL access control model. There are privileges. Privileges are assigned/revoked using \texttt{GRANT} and \texttt{REVOKE} commands. This kind of things :-) This is essential to understand the rest (e.g., what are ACLs? how are they defined? what are the roles?)}
 
+In the SQL access control model database users have privileges. 
+%
+Each privilege represents an op
+%
+Each privilege represents an operation that can be done in the database, such as, creating tables, creating triggers, update tables etc.
+%
+The privileges can be assigned using \texttt{GRANT} and revoked using \texttt{REVOKE}.
+%
+However the user issuing these queries, must have the privilege assigned to him.
+%
+This generally is the database administrator.
+%
+Privileges can 
+
 \subsection{Implementation in PostgreSQL}
 The administrator has to define an access control policy for the database. 
 %
