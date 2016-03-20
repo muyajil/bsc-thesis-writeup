@@ -10,10 +10,24 @@ Query containment enables us to argue about the execution of queries in the pres
 %
 \remark{I have tried to just give a teaser on the problem here, in the next section we introduce it, and then we see how we can apply it. What do you think?}
 
+
+
 \subsection{Query Containment}
 
-The subject of query containment refers to the problem where for two queries $Q_1$ and $Q_2$ we want to answer if the tuples returned from $Q_1$ are always, i.e., in all database states, contained in the ones returned from $Q_2$.
+Query containment is the problem of determining given two queries $Q_1$ and $Q_2$ whether the result of $Q_1$ is always contained in the result of $Q_2$. %Namely, we   we want to answer if the tuples returned from $Q_1$ are always, i.e., in all database states, contained in the ones returned from $Q_2$.
 
+Query containment can be formalized as follows.
+%
+Let $Q_1$ and $Q_2$ be two queries over a common database schema $D$.
+%
+We say that \emph{$Q_1$ is contained in $Q_2$}, denoted by $Q_1 \subseteq Q_2$, if for all possible database states $\mathit{db}$, $r(Q_1,\mathit{db}) \subseteq r(Q_2, \mathit{db})$, where $r(Q, db)$ denotes the bag of tuples returned from executing the query $Q$ on the database $db$.
+
+
+Given two queries $Q_1$ and $Q_2$, the query containment problem is, therefore, to determine whether $Q_1 \subseteq Q_2$ holds.
+%
+This problem is well-known to be undecidable for relational calculus and SQL.~\cite{abiteboul1995foundations}.
+
+\remark{Why time and runs??}
 We define the current state of a database $db$ as the sequence of commands issued to the database up to this point, further $db(t)$ returns the database state at time $t$.
 %
 Moreover we define the fuction $r(Q, db(t))$ which returns the bag of tuples returned from issuing $Q$ to $db(t)$.
@@ -92,6 +106,10 @@ Figure~\ref{figure:algorithms:infrules} shows our inference rules.
 
 \remark{Is $A_1'$ and $A_1$ in the wrong way here? I understand it that $A_1$ is all the attributes, and in $A_1'$ we remove the jth attribute right? Same for $A_2$}
 
+\remark{From the definition $A_1$ is the one without the $j$-th attribute and $A_1'$ is the one with all the attributes (same for $_2$).
+%
+Feel free to invert them if you wish.}
+
 \[
 \infer[\text{INTER1}]
 	{Q_1 \text{\texttt{ INTERSECTION }} Q_3 \subseteq Q_1}
@@ -134,8 +152,11 @@ For any of the tuples returned from a \texttt{SELECT} query the \texttt{WHERE} c
 In the AND-rule we restrict this filter further by adding another boolean expression in conjunction.
 %
 In the OR-rule however, we widen the filter by adding a boolean expression in disjunction.
+%
+\remark{Do we need OR-1, OR-2, AND-1, and AND-2 as we do for INTERSECTION and UNION?}
 
-A requirement that one query can be contained in the other is that both queries use the same projections, i.e., the same attribute list.
+
+A requirement for containment is that both queries use the same projections, i.e., the same attribute list. \remark{The only real requirement is about the number of tuples. The idea behind this rule is that if two queries are contained, then by removing the same attributes, then also the resulting queries are contained.}
 %
 Tuples resulting from two queries with different attribute lists are not comparable, since they can never be equal.
 %
@@ -155,7 +176,7 @@ The union of two bags contains all elements that appear in at least one of the i
 %
 The rule EXCEPT holds by the definition of subtracting multisets.
 
-Lastly the rule TRANS holds by the definition of containment.
+Lastly the rule TRANS holds by the definition of containment. \remark{TRANS is transitivity of query containment. Follows directly from transitivity of subset}
 
 \FloatBarrier
 \subsection{Checking security of \texttt{SELECT} queries}
@@ -174,6 +195,8 @@ This set is computed using the query containment rules introduced in Section 5.1
 Here we use these sets to provide the same rewriting as in~\cite{guarnieri2016strong}, but for SQL.
 %
 For each query $Q$ the rewriting algorithm produces a secure over-approximation $Q^\bot$ and under-approximation $Q^\top$ of the query.
+%
+\remark{Are you sure about the signs and the under- and over-approximations?}
 
 \subsubsection{Rewriting Algorithm}
 %
@@ -185,7 +208,7 @@ The query $Q^\bot$ is built by replacing each referenced table $T$ by the inters
 %
 $Q^\top$ is built analogously with unions of all the tables $\tau \in T^\top$.
 %
-We further define the helper function \emph{$S$.card()}, which returns the cardinality of the set $S$.
+We further define the helper function \emph{$S$.card()} \remark{Why not $|S|$?}, which returns the cardinality of the set $S$.
 
 Since we only consider tables or views from $T^\top$ and $T^\bot$, which, according to the access control policy, are readable to the user, it follows that any query constructed by the rewriting algorithm is secure.
 %
@@ -214,7 +237,7 @@ We can further argue that $Q^\top \subseteq Q \subseteq Q^\bot$ since the rewrit
 					{$T'$ += "\texttt{(SELECT * FROM $\tau$)}"\;}
 				}
 		}
-     	
+		\remark{Are you sure about the algorithm? I think you should perform the union of the under-approximations, and the intersection of the over-approximations.}     	
 		\ForEach{table $\tau$ in $T^\top$}{
 		    numTop$--$\;
 			\If{$u$ is authorized to read $\tau$}
@@ -225,11 +248,14 @@ We can further argue that $Q^\top \subseteq Q \subseteq Q^\bot$ since the rewrit
 		}
 		$T'$ += "\texttt{) AS $T$}"\;
 		$T''$ += "\texttt{) AS $T$}"\;
-		Replace $T$ with $T'$ in $Q^\bot$\;
-     	Replace $T$ with $T''$ in $Q^\top$\;
+		Replace all occurrences of $T$ in $Q^\bot$ with $T'$ \;
+     	Replace all occurrences of $T$ in $Q^\top$ with $T''$\;
      }
 
      \Return ($Q^\bot$, $Q^\top$)\;
+\remark{Notation:  in the rules you used $T$ for a sequence of tables, here you use it for a single table.}
+
+\remark{Haha! so $Q^\bot$ is the under-approximation and $Q^\top$ is the over-approximation. Fix the rest accordingly.}
 \end{algorithm}
 
 \smallskip
@@ -265,19 +291,19 @@ Therefore the rewriting algorithm will return the following queries:
 
 \subsubsection{Authorization of \texttt{SELECT} queries}
 
-As we have seen before the both the over- and under-approximation are secure according to the current SQL standard, since all the referenced tables in those queries are readable to the user issuing the query.
+As we have seen before the both the over- and under-approximation are secure, since all the referenced tables in those queries are readable to the user issuing the query.
 %
 We have further seen that the inclusions $Q^\top \subseteq Q$ and $Q \subseteq Q^\bot$ hold for the rewritten queries $Q^\top$ and $Q^\bot$.
 %
 The authorization algorithm for \texttt{SELECT} queries is shown in figure~\ref{alg:algorithms:auth}
 %
-For each \texttt{SELECT} query $Q$ the algorithm uses the rewrite function introduced above to obtain the approximations $Q^\bot$ and $Q^\top$.
+For each \texttt{SELECT} query $Q$, the algorithm uses the rewrite function introduced above to obtain the approximations $Q^\bot$ and $Q^\top$.
 %
-After that the algorithm checks if the tuples returned by $Q^\bot$ and $Q^\top$ are the same, by executing the query  $Q^\bot$ \texttt{EXCEPT} $Q^\top$ and checking if it returns $\emptyset$.
+Afterwards, the algorithm checks if the tuples returned by $Q^\bot$ and $Q^\top$ are the same, by executing the query  $Q^\bot$ \texttt{EXCEPT} $Q^\top$ and checking if it returns $\emptyset$. \remark{Are you sure that this is correct? $Q^\bot \setminus Q^\top = \emptyset$ implies that $Q^\bot \subseteq Q^\top$ but this holds trivially.}
 %
 If this is the case, we know that $Q^\bot \subseteq Q^\top$.
 %
-Further we know that $Q^\top \subseteq Q$ and $Q \subseteq Q^\bot$, which leads to the conclusion that $Q^\top = Q = Q^\bot$.
+Further we know that $Q^\top \subseteq Q$ and $Q \subseteq Q^\bot$, which leads to the conclusion that $Q^\top = Q = Q^\bot$. \remark{See my comments to the algorithm. I think you're mixing over and under approximation. Double check all the reasoning please.}
 %
 Since both $Q^\bot$ and $Q^\top$ are secure, we can argue that $Q$ is secure as well and authorize it.
 %
@@ -311,19 +337,17 @@ It is obvious that the query will return $\emptyset$, therefore the algorithm wi
 
 \paragraph{Extension to the Truman model}
 
-The algorithms devised in this chapter are constructed under the \emph{Non-truman model}.
+The algorithms devised in this chapter are constructed under the \emph{Non-truman model}~\cite{rizvi2004extending}, which specifies an access control mechanism as a component which decides if a query is authorized or not and therefore returns $\bot$ or $\top$.
 %
-Identified in~\cite{rizvi2004extending} it specifies an access control mechanism as a component which decides if a query is authorized or not, and therefore returns $\bot$ or $\top$.
-%
-The current implementations of these mechanisms either interrupt the execution of the query and notify the user if a query was not authorized or do not interrupt the execution of the query if the query was authorized.
+The current implementations of these mechanisms either interrupt the execution of the query and notify the user if a query is not authorized or do not interrupt the execution of the query if the query is authorized.
 %
 The Non-truman model is the most used model in database access control mechanisms.
 %
-The \emph{Truman model} however, uses access control mechanisms with another approach, namely the access control mechanism internally executes the query, and only returns the tuples, which are readable for the user according to the access control policy.
+The \emph{Truman model} however, uses access control mechanisms with another approach, namely the access control mechanism internally executes the query and returns only those tuples that the user issuing the query is authorized to read according to the access control policy.
 %
 The user issuing a query will not notice if the query he issued is not authorized for him.
 %
-Our algorithm is extensible to, and even would be better suited for the Truman model.
+Our query rewriting algorithm can be used also for the Truman model, and even would be better suited for the Truman model. \remark{It's not so good to say that we did X, but I'd have been much better doing Y}
 %
 We under-approximate the tuples resulting from a query during the algorithm that returns the access control decision, and we further know that the under-approximation is secure with respect to the access control policy.
 %
