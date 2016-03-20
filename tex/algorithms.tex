@@ -313,13 +313,13 @@ It is obvous that the query will return $\emptyset$, therefore the algorithm wil
 
 The algorithms devised in this chapter are constructed under the \emph{Non-truman model}.
 %
-It specifies an access control mechanism as a component which decides if a query is optimized or not, and therefore returns $\bot$ or $\top$.
+Identified in~\citep{rizvi2004extending} it specifies an access control mechanism as a component which decides if a query is optimized or not, and therefore returns $\bot$ or $\top$.
 %
 The current implementations of these mechanisms either interrupt the execution of the query and notify the user if a query was not authorized or do not interrupt the execution of the query if the query was authorized.
 %
 The Non-truman model is the most used model in database access control mechanisms.
 %
-The \emph{Truman model} however uses access control mechanisms with another approach, namely the access control internally executes the query, and only returns the tuples, which are readable for the user according to the access control policy.
+The \emph{Truman model} however, uses access control mechanisms with another approach, namely the access control internally executes the query, and only returns the tuples, which are readable for the user according to the access control policy.
 %
 The user issuing a query will not notice if the query he issued is not authorized for him.
 %
