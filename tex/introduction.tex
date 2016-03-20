@@ -43,35 +43,29 @@ Our algorithm extends the one proposed by Guarnieri et al. to the SQL language a
 \smallskip
 \noindent
 {\bf Contributions.}
+According to~\cite{guarnieri2016strong} existing database access control mechanisms are not secure. 
 %
-\remark{The rest of the introduction is good. We still have to sharpen a bit the contribution.
+Therefore Guarnieri et al. have devised a new access control mechanism, based on the relational calculus, that successfully prevents attacks that thwart existing access control mechanisms.
 %
-It is currently still unclear why what you did is a contribution.
+This access control mechanism requires a more permissive way to authorize \texttt{SELECT} queries.
 %
-How you improved the state of the art? Why people should build on top of this stuff?
-%
-To make the presentation easier, I'd structure this section as follows: One/two brief sentences outlining the problem. Then just say something like "In this respect, we made the following contributions". Then, two paragraphs, one per contribution explaining how these things improve the state of the art. You can even start these paragraphs as "First, we did X. ...", "Second, we did Y...."}
+In this respect we made the following contributions.
 
+First, refactored the original the implementation of PostgreSQL, a widely used and open source, DBMS.
+%
+For this we isolated the access control mechanism from the rest of the codebase and implemented a general interface for access requests, independant of the type of query.
+%
+The original implementation requires a deep understanding of the backend architecture of PostgreSQL to be able to extend and improve the current access control mechanism.
+%
+Developers can use the refactored version of PostgreSQL to implement new, stronger access control mechanisms, without needing to modify the internals of PostgreSQL.
 
+Important parts of the new access control mechanism proposed by Guarnieri et al. a query rewriting algorithm, and a function which decides the authorization of \texttt{SELECT} queries in the relational calculus.
 %
-Guarnieri et al. have tested the security of access control mechanisms in various DBMSs in~\cite{guarnieri2016strong}.
+As a second contribution we extended these parts of the access control mechanism from~\cite{guarnieri2016strong} to SQL.
 %
-According to their findings PostgreSQL is the most vulnerable DBMS, therefore we have decided on PostgreSQL for implementing the new access control mechanism for \texttt{SELECT} queries. \remark{These two sentences are a bit weird.}
-
-The current architecture of PostgreSQL makes it difficult to implement such a new algorithm.
+This is essential to effectively secure PostgreSQL and prevent leakages of sensitive information. 
 %
-Therefore, we refactor the original PostgreSQL's implementation to isolate the access control mechanism and provide a general interface for access requests, independent of the type of query.
-%
-The original implementation requires a deep understanding of the backend architecture of PostgreSQL to be able to extend and improve the current access control algorithm.
-%
-Our refactoring provides the possibility of improving and extending access control without interfering with the internals of the DBMS.
-%
-
-Second, we extend the access control mechanism proposed by Guarnieri et al.~\cite{guarnieri2016strong} to SQL. \remark{Which mechanism? This sounds like claiming the whole mechanism as contribution.}
-%
-This is essential to effectively secure PostgreSQL and prevent leakages of sensitive information.
-%
-In more detail, we implemented a new access control mechanism for \texttt{SELECT} queries.
+In more detail we devised a new access control mechanism for \texttt{SELECT} queries.
 %
 This is the first building block to successfully implement strong access control mechanisms, such as the one proposed by Guarnieri et al.
 
@@ -89,4 +83,4 @@ In chapter 5 we will begin by showing the formal models of all aspects of the ne
 %
 In chapter 6 we will introduce some related work to the thesis. 
 %
-Finally in chapter 7 the conclusions are drawn and future possibilities are discussed.
+Finally, in chapter 7 the conclusions are drawn and future possibilities are discussed.

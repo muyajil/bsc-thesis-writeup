@@ -6,7 +6,6 @@ The conclusions made in the following paragraphs are backed by an analysis of th
 
 \subsection{SQL access control model}
 
-%In SQL access control model database users have privileges.
 The SQL standard defines a number of privileges, where each privilege represents an operation that can be done in the database, such as creating tables, creating triggers, or updating tables.
 
 Privileges can be assigned either on the database or on a \emph{database object}.
@@ -65,6 +64,10 @@ For this they devised rules on how to compute under-approximations of query cont
 They used these approximations to generate secure under- and over-approximations of queries using a rewriting mechanism.
 %
 They further devised a function \emph{secure} which uses the rewriting mechanism to decide the authorization of queries.
+
+
+
+
 %
 These findings are extended to support SQL in chapter 5.
 
