@@ -48,23 +48,7 @@ The implementation in PostgreSQL follows the SQL standard to large extents.
 %
 There are however subtle differences between the former and the latter.
 %
-For instance in the SQL standard triggers are defined as separate SQL queries, which are executed in response to regular queries issued by users. \remark{This sounds weird. A trigger doesn't look like a query (the create trigger is a query though).}
-%
-PostgreSQL however offers the possibility to execute, among others, C functions as triggers.
-%
-This requires a different implementation.
-%
-In PostgreSQL, therefore, triggers are actually  references to functions. In more detail, a trigger consists of a condition and a function.
-%
-If during the execution of a user submitted query the condition is satisfied, the function is executed. \remark{Is the condition the WHEN clause? If yes, says so. Why are you focusing on triggers since we don't use them later?}
-%
-Therefore the access control mechanism needs to handle the execution of functions differently.
-%
-If a user creates a trigger in the SQL standard he only needs the privilege to create triggers.
-%
-In PostgreSQL however the user needs the privilege to create triggers and the execution privilege on the function he wants to execute with the trigger.
-%
-If however the execution privilege on the function is revoked, the trigger stays intact.
+\remark{add a better example than triggers}
 
 When users submit queries to the database system, depending on the type of the query, an internal function is called, which among other things, retrieves the ACL for objects that are referenced in the query and checks the privileges.
 %
@@ -76,6 +60,10 @@ As mentioned in Chapter 1 Guarnieri et al. have devised a new access control mec
 %
 One key component of this mechanism is deciding if boolean queries in the relational calculus are secure with respect to the access control policy.
 %
-\remark{how deep should I go here? Should I try to explain security of judgements, or keep an overview and talk about resulting tuples from queries?}
+For this they devised rules on how to compute under-approximations of query containment.
 %
-\remark{Just give the bits that you're going to use later in chapter 5. For instance, query rewriting, containment, etc.}
+They used these approximations to genereate secure under- and over-approximations of queries using a rewriting mechanism.
+%
+They further devised a function \emph{secure} which uses the rewriting mechanism to decide the authorization of queries.
+%
+These findings are extended to support SQL in chapter 5.
