@@ -62,8 +62,16 @@ One key component of this mechanism is deciding if boolean queries in the relati
 %
 For this they devised rules on how to compute under-approximations of query containment.
 %
-They used these approximations to genereate secure under- and over-approximations of queries using a rewriting mechanism.
+They used these approximations to generate secure under- and over-approximations of queries using a rewriting mechanism.
 %
 They further devised a function \emph{secure} which uses the rewriting mechanism to decide the authorization of queries.
 %
 These findings are extended to support SQL in chapter 5.
+
+\remark{This does not add much to what we said in the introduction. I'd give some more details about the algorithm.
+%
+The idea is that you want to extend the algorithm from RC to SQL.
+%
+So, first explain how the algorithm work (and the main components) for RC.
+%
+Afterwards, you can just say that you want to extend it to SQL, and you explain, component by component, how you achieved it.}
