@@ -35,24 +35,6 @@ As a result, it is more permissive than existing solutions.
 
 
 \remark{Most of this discussion should probably go in the related work section.}
-The algorithms devised in this thesis are constructed under the \emph{Non-truman model}.
-%
-It specifies an access control mechanism as a component which decides if a query is optimized or not, and therefore returns $\bot$ or $\top$.
-%
-The current implementations of these mechanisms either interrupt the execution of the query and notify the user if a query was not authorized or do not interrupt the execution of the query if the query was authorized.
-%
-The Non-truman model is the most used model in database access control mechanisms.
-%
-The \emph{Truman model} however uses access control mechanisms with another approach, namely the access control internally executes the query, and only returns the tuples, which are readable for the user according to the access control policy.
-%
-The user issuing a query will not notice if the query he issued is not authorized for him.
-%
-Our algorithm is extensible to, and even would be better suited for the Truman model.
-%
-We under-approximate the tuples resulting from a query during the algorithm that returns the access control decision, and we further know that the under-approximation is secure with respect to the access control policy.
-%
-Therefore it is secure to return the under-approximation to the user.
-%
-Our implementation contains a subset of the introduced inference rules for containment, implementing all of them would result in a better under-approximation.
+
 
 \remark{on what do we want to focus further here?}

@@ -4,13 +4,15 @@
 
 \subsection{Query Containment}
 
-\remark{Here, First give the intuition, then formalize the problem, then give results.}
-
 The subject of query containment refers to the problem where for two queries $Q_1$ and $Q_2$ we want to answer if the tuples returned from $Q_1$ are always, i.e., in all database states, contained in the ones returned from $Q_2$.
+
+We define the current state of a database $db$ as the sequence of commands issued to the database up to this point, further $db(t)$ returns the database state at time $t$.
 %
+Moreover we define the fuction $r(Q, db(t))$ which returns the bag of tuples returned from issuing $Q$ to $db(t)$.
+%
+A query $Q_1$ is contained in another query $Q_2$ if $r(Q_1, db(t)) \subseteq r(Q_2, db(t))$ $\forall t$.
+
 This problem is well-known to be undecidable for relational calculus and SQL.~\cite{abiteboul1995foundations}.
-%
-\remark{Discuss its use in databases.}
 
 \subsubsection{Query Containment Approximation}
 
@@ -309,3 +311,38 @@ From the example above the authorization algorithm will execute the following qu
 \end{verbatim}
 \noindent
 It is obvous that the query will return $\emptyset$, therefore the algorithm will authorize the query $Q = $ \texttt{SELECT * FROM Programmer} $\blacksquare$.
+
+\paragraph{Extension to the Truman model}
+
+The algorithms devised in this chapter are constructed under the \emph{Non-truman model}.
+%
+It specifies an access control mechanism as a component which decides if a query is optimized or not, and therefore returns $\bot$ or $\top$.
+%
+The current implementations of these mechanisms either interrupt the execution of the query and notify the user if a query was not authorized or do not interrupt the execution of the query if the query was authorized.
+%
+The Non-truman model is the most used model in database access control mechanisms.
+%
+The \emph{Truman model} however uses access control mechanisms with another approach, namely the access control internally executes the query, and only returns the tuples, which are readable for the user according to the access control policy.
+%
+The user issuing a query will not notice if the query he issued is not authorized for him.
+%
+Our algorithm is extensible to, and even would be better suited for the Truman model.
+%
+We under-approximate the tuples resulting from a query during the algorithm that returns the access control decision, and we further know that the under-approximation is secure with respect to the access control policy.
+%
+Therefore it is secure to return the under-approximation to the user.
+%
+Our implementation contains a subset of the introduced inference rules for containment, implementing all of them would result in a better under-approximation.
+%
+Algorithm~\ref{alg:algorithms:authtruman} shows how our algorithm can be extended to the Truman model.
+%
+\begin{algorithm}
+\caption{Authorization algorithm for \texttt{SELECT} queries}
+\label{alg:algorithms:authtruman}
+	\SetAlgoLined
+	\KwData{Query $Q$, user $u$}
+	\KwResult{$R$, the tuples returned from the query that are readable to the user}
+	($Q^\bot$, $Q^\top$) = rewrite($Q$)\;
+	$R$ = executeQuery($Q^\top$)\;
+	\Return $R$
+\end{algorithm}
