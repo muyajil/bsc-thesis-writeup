@@ -19,16 +19,6 @@ Indeed, as already identified in~\cite{rizvi2004extending, guarnieri2014optimal,
 
 Recently, Guarnieri et al.~\cite{guarnieri2016strong} investigated the limitations of SQL's access control model and accordingly  developed a novel, more secure, access control mechanism.
 %
-This access control mechanism shows that sub-routines for checking the security of \texttt{SELECT} queries are also one of the main building blocks of strong access control mechanisms such as the one proposed.
-%
-The mechanism however also requires that these routines are more permissive and efficient, to keep the overall database system still usable.
-%
-Motivated by this Guarnieri et al. developed such a routine for checking the security of \texttt{SELECT} statements.
-
-\remark{
-Recently, Guarnieri et al.~\cite{guarnieri2016strong} investigated the limitations of SQL's access control model and accordingly  developed a novel, more secure, access control mechanism.
-%
-%This access control mechanism shows that sub-routines for checking the security of \texttt{SELECT} queries are also one of the main building blocks of strong access control mechanisms such as the one proposed.
 The main building block of this mechanism is an algorithm for checking the security of \texttt{SELECT} queries.
 %
 This algorithm is used not only to decide whether \texttt{SELECT} queries are authorized or not, but also to determine whether all the other commands may leak sensitive information. 
@@ -36,7 +26,6 @@ This algorithm is used not only to decide whether \texttt{SELECT} queries are au
 Using naive algorithms, such as those proposed in the SQL standard, for this would result in an extremely unusable system, due to their restrictiveness.
 %
 Motivated by this, Guarnieri et al. developed a more permissive algorithm, based on query rewriting, for checking the security of \texttt{SELECT} queries.
-}
 
 The algorithm proposed in~\cite{guarnieri2016strong} however, has two main practical limitations.
 %
@@ -54,17 +43,18 @@ Our algorithm extends the one proposed by Guarnieri et al. to the SQL language a
 \noindent
 {\bf Contributions.}
 %
-\remark{The first sentence is unclear. Now we just mention briefly the attacks in the intro.}
+Guarnieri et al. have tested the security of access control mechanisms in various DBMSs in~\cite{guarnieri2016strong}.
 %
-Due to the gravity of the current situation, where the mentioned attacks can cause severe damage, this thesis explores the possibility of preventing confidentiality attacks in PostgreSQL, a widely used DBMS. 
+According to their findings PostgreSQL is the most vulnerable DBMS, therefore we have decided that implementing the new access control mechanism for \texttt{SELECT} queries.
+
+As we will see in Chapter 4 the current architecture of PostgreSQL makes it difficult to implement such a new algorithm.
 %
-First, we refactor the original PostgreSQL's implementation to isolate the access control mechanism and provide a general interface for access requests, independent of the type of query.
+Therefore first, we refactor the original PostgreSQL's implementation to isolate the access control mechanism and provide a general interface for access requests, independent of the type of query.
 %
 The original implementation requires a deep understanding of the backend architecture of PostgreSQL to be able to extend and improve the current access control algorithm.
 %
 Our refactoring provides the possibility of improving and extending access control without interfering with the internals of the DBMS.
 %
-\remark{The first contribution should be sharpened a bit. Now it's still a bit weak.}
 
 Second, we extend the access control mechanism proposed by Guarnieri et al.~\cite{guarnieri2016strong} to SQL.
 %
