@@ -92,10 +92,8 @@ For instance, checking the authorization of \texttt{SELECT} queries is done very
 This check is on an internal datastructure that represents the tables referenced in the query.
 %
 Therefore, we need to modify the behaviour of the executor just to modify the way \texttt{SELECT} queries are authorized.
-\remark{Very good! This is the kind of information we need to motivate the refactoring :-) We can even use a light version of this to strengthen  the contributions.}
 %
-\remark{Add some glue, such as ``This is what motivated us to refactor PostgreSQL blah blah...''}
-
+This fact motivated us to refactor PostgreSQL in a way that allows for the implementation of new access control mechanisms, without interfering with the internals of the DBMS.
 %
 \FloatBarrier
 
@@ -104,9 +102,9 @@ Therefore, we need to modify the behaviour of the executor just to modify the wa
 %
 After analyzing the backend, by executing each type of query and following the backend through the process with a debugger, all the functions or code regions relevant to making access control decisions were identified.
 %
-This identification allowed us to gradually move the code to an external module and build a uniform interface, which is called inside the Traffic cop, when the backend expects a decision. \remark{decision on what?} 
+This identification allowed us to gradually move the code to an external module and build a uniform interface, which is called inside the Traffic cop, when the backend expects a access control decision. 
 
-The building of a uniform interface introduced several engineering challenges. \remark{I wouldn't call them challenges. They are design choices (or decisions)}
+During the building of this interface we made several design choices.
 %
 The first decision was to create a stand-alone module in the backend of PostgreSQL dedicated to access control.
 This allows developers to clearly identify the code that is responsible for authorizing any type of query.
@@ -121,7 +119,12 @@ ac_return_data authorized(ac_decision_data *decision_data);
 %
 The structs used in the interface are extensible. For each type of query there is a field in both structs, which represent the input and output data for the all queries of this type.
 %
-The structs look as follows: \remark{The structs should be explained a bit more. The comments in the code do not give too much information. For instance, why do you have all this stuff? Where do they come from?}
+Each field in the decision data struct corresponds to a function that was migrated to the new module.
+%
+The fields in the decision data struct are pointers to further structs that represent the argument list of the respective function.
+%
+The structs look as follows: 
+%
 \begin{lstlisting}[frame=single, style=customc]
 union ac_return_data_struct {
 	/* Returned if CREATE is authorized otherwise NULL*/
@@ -176,15 +179,16 @@ This allows future developers to gradually implement a new algorithm, by identif
 %
 To facilitate the identification of the received query,  we have included an additional field in the decision data, which tells exactly what type of query was received by the interface, e.g., \texttt{INSERT} or \texttt{UPDATE} instead of just identifying it as a non-utility query.
 
-We also added a stack that, at any point of the execution of the database system, holds all queries that are not yet completed. \remark{Unclear what complete means}
+We also added a stack that, at any point of the execution of the database system, holds all queries that are not yet completed, meaning they were not yet interrupted by the access control mechanism nor have they returned any tuples to the frontend application.
 %
 This allows developers to always have a clear view on the state of the database system.
 %
 The top element of the stack represents the currently executing query.
 %
-Elements are popped from the stack after the database transaction is completed. \remark{??? which transaction. This comes out of the blue.}
+Elements are popped from the stack after the query is completed.
+%
+The Backend process consists of one thread, further it is the only process that accesses the context stack, therefore it does not have to be thread-safe.
 % 
-\remark{What about concurrency?}
 Each stack's element is a struct that looks as follows:
 %
 \begin{lstlisting}[frame=single, style=customc]
@@ -207,7 +211,16 @@ The invoker is relevant if the query is executed under other privileges than the
 A context also contains the query in text form and as a parsed abstract syntax tree.
 %
 Also we included three boolean values: ``authorized'' indicates if the query is authorized, ``rewritten'' tells us if the query was rewritten as part of the access control mechanism, and ``authorizesnext'' is used if the query authorizes the query that is below in the context stack. 
-\remark{Explain why we need those.}
+%
+The fields ``rewritten'' and ``authorizesnext'' are used by our algorithm.
+%
+The field ``rewritten'' is set to $\top$ after our algorithm has rewritten a query and submits it to the database. 
+%
+Since the rewritten query is processed the same way as any other query, we need this field prevent the access control mechanism to rewrite the query again.
+%
+Further the result obtained from the rewritten query will determine the decision if the original query is authorized.
+%
+More details on the authorization and rewriting of queries will be given in Chapter 5.
 %
 The stack is used to simplify the implementation of novel mechanisms such as the one in~\cite{guarnieri2016strong}, since the algorithm from Guarnieri et. al requires knowledge about other aspects of the system such as triggers being executed, or nested queries.
 %
