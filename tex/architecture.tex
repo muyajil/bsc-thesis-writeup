@@ -21,17 +21,17 @@ The \emph{Main} module is responsible for checking the underlying system require
 
 The \emph{Postmaster} is the starting point for any PostgreSQL server instance. 
 %
-In this module system setup tasks such as loading the data representing the database and setting up listeners for database connections are executed.
+In this module, system setup tasks such as loading the data representing the database and setting up listeners for database connections are executed.
 %
 After setting everything up, the Postmaster waits for a connection request from a \emph{frontend application}, i.e., any application that connects to the database.
 %
-When receiving a connection request the Postmaster forks itself.
+When receiving a connection request, the Postmaster forks itself.
 %
 The child process then will either authorize the request and become a \emph{Backend} or reject the request and exit.
 %
 All the blue boxes in the flowchart represent modules of the Backend of a PostgreSQL server.
 
-The Backend consists of an infinite loop which breaks at the parser stage.
+The Backend consists of an infinite loop that breaks at the parser stage.
 %
 At this point the Backend is ready to receive a query from the connected frontend application.
 %
@@ -47,16 +47,16 @@ The Traffic Cop first analyzes the query to classify it either as a {utility que
 %
 For instance, \texttt{SELECT}, \texttt{DELETE}, and \texttt{UPDATE} are all non-utility queries. 
 %
-After determining the type the Traffic Cop forwards utility queries to the \emph{Utility Command} module, which checks the authorization of the query and, if the query is authorized, executes it.
+After determining the type, the Traffic Cop forwards utility queries to the \emph{Utility Command} module, which checks the authorization of the query and, if the query is authorized, executes it.
 
 Non-utility commands are forwarded to the \emph{Rewrite Query} module.
 %
 Here the query is rewritten according to the \emph{PostgreSQL Rule System}.
 %
-The PostgreSQL Rule System is a collection of rules on how to rewrite queries, such that the later modules of the Backend can optimize the query as good as possible.
+The PostgreSQL Rule System is a collection of rules on how to rewrite queries in such a way that the other modules of the Backend can optimize the query as good as possible.
 The Rule System, for instance, expands views to their respective definition, allowing the Generate Paths module to produce more comprehensive execution paths.
 %
-After that the rewritten query is passed to the \emph{Generate Paths} module.
+After the rewriting, the rewritten query is passed to the \emph{Generate Paths} module.
 %
 Here the system generates different \emph{paths} to execute the query.
 %
@@ -79,19 +79,22 @@ This plan is then forwarded to the executor, which will execute it and return th
 \footnotetext{\url{http://www.postgresql.org/developer/backend}}
 \subsubsection{Access Control}
 %
-Access control decisions can be made in any of the the following: Traffic cop, Executor, or in the module that handles the utility queries.
+Access control decisions can be made in any of the the following modules: Traffic cop, Executor, or in the module that handles the utility queries.
 %
-The functions making these decisions, however also prepare the system for the upcoming change, by, for instance, returning the address where a new table is allocated.
+The functions making these decisions, however, also prepare the system for the upcoming change, by, for instance, returning the address where a new table is allocated.
 %
 Due to the distribution and inconsistency of the access control mechanism, there is no uniform interface that can be called for such a decision.
 %
-Furthermore  the mechanism is, at some points, closely connected to the internals of the database, making the implementation of a new mechanism nearly impossible without refactoring the code.
+Furthermore,  the mechanism is, sometimes, closely connected to the internals of the database, making the implementation of a new mechanism nearly impossible without refactoring the code.
 %
 For instance, checking the authorization of \texttt{SELECT} queries is done very late, namely in the executor.
 %
 This check is on an internal datastructure that represents the tables referenced in the query.
 %
-Therefore we need to modify the behaviour of the executor just to modify the way \texttt{SELECT} queries are authorized.
+Therefore, we need to modify the behaviour of the executor just to modify the way \texttt{SELECT} queries are authorized.
+\remark{Very good! This is the kind of information we need to motivate the refactoring :-) We can even use a light version of this to strengthen  the contributions.}
+%
+\remark{Add some glue, such as ``This is what motivated us to refactor PostgreSQL blah blah...''}
 
 %
 \FloatBarrier
@@ -99,11 +102,11 @@ Therefore we need to modify the behaviour of the executor just to modify the way
 %
 \subsection{Refactoring}
 %
-After analyzing the backend, by executing each type of query and following the backend through the process with a debugger, all the functions or code regions relevant to making access control decisions was identified.
+After analyzing the backend, by executing each type of query and following the backend through the process with a debugger, all the functions or code regions relevant to making access control decisions were identified.
 %
-This identification allowed to gradually move the code to an external module and build a uniform interface which is called inside the traffic cop, when the backend expects a decision. 
-%
-The building of a uniform interface however introduced several engineering challenges.
+This identification allowed us to gradually move the code to an external module and build a uniform interface, which is called inside the Traffic cop, when the backend expects a decision. \remark{decision on what?} 
+
+The building of a uniform interface introduced several engineering challenges. \remark{I wouldn't call them challenges. They are design choices (or decisions)}
 %
 The first decision was to create a stand-alone module in the backend of PostgreSQL dedicated to access control.
 This allows developers to clearly identify the code that is responsible for authorizing any type of query.
@@ -118,7 +121,7 @@ ac_return_data authorized(ac_decision_data *decision_data);
 %
 The structs used in the interface are extensible. For each type of query there is a field in both structs, which represent the input and output data for the all queries of this type.
 %
-The structs look as follows:
+The structs look as follows: \remark{The structs should be explained a bit more. The comments in the code do not give too much information. For instance, why do you have all this stuff? Where do they come from?}
 \begin{lstlisting}[frame=single, style=customc]
 union ac_return_data_struct {
 	/* Returned if CREATE is authorized otherwise NULL*/
@@ -143,9 +146,9 @@ struct ac_decision_data_struct {
 };
 \end{lstlisting}
 %
-Further each field in the decision data struct is actually a pointer that refers to a struct, that in turn holds all information needed for deciding if the respective type of query is authorized.
+Each field in the decision data struct is actually a pointer that refers to a struct, which in turn holds all information needed for deciding if the respective type of query is authorized.
 %
-For instance the struct that is required to check the authorization of \texttt{GRANT} or \texttt{REVOKE} queries looks as follows:
+For instance, the struct that is required to check the authorization of \texttt{GRANT} or \texttt{REVOKE} queries looks as follows:
 %
 \begin{lstlisting}[frame=single, style=customc]
 /* Data needed for deciding on GRANT queries */
@@ -163,25 +166,26 @@ struct ac_grant_data_struct {
 };
 \end{lstlisting}
 %
-This structure actually represents the argument list the original function that authorizes \texttt{REVOKE} and \texttt{GRANT} queries.
+This structure actually represents the argument list of the original function that authorizes \texttt{REVOKE} and \texttt{GRANT} queries.
 %
 Any function that calls this interface will pass all the data needed to make the decision.
 %
 Depending on the data received, the interface internally calls the functions that were previously distributed among the modules.
 %
-This allows for future developers to gradually implement a new algorithm, by identifying the query received, and either return the result of a new algorithm, or call the original function responsible for the query.
+This allows future developers to gradually implement a new algorithm, by identifying the query received, and either return the result of a new algorithm, or call the original function responsible for the query.
 %
-To facilitate the identification of the query received we have included an additional field in the decision data, which tells exactly what type of query was received by the interface, i.e., \texttt{INSERT} or \texttt{UPDATE} instead of just identifying it as a non-utility query.
+To facilitate the identification of the received query,  we have included an additional field in the decision data, which tells exactly what type of query was received by the interface, e.g., \texttt{INSERT} or \texttt{UPDATE} instead of just identifying it as a non-utility query.
 
-Further we added a stack that at any point of the execution of the database system, holds all queries that are not yet completed.
+We also added a stack that, at any point of the execution of the database system, holds all queries that are not yet completed. \remark{Unclear what complete means}
 %
 This allows developers to always have a clear view on the state of the database system.
 %
 The top element of the stack represents the currently executing query.
 %
-Elements are popped from the stack after the database transaction is completed.
-%
-Each element is a struct that looks as follows:
+Elements are popped from the stack after the database transaction is completed. \remark{??? which transaction. This comes out of the blue.}
+% 
+\remark{What about concurrency?}
+Each stack's element is a struct that looks as follows:
 %
 \begin{lstlisting}[frame=single, style=customc]
 /* Data structure representing context */
@@ -196,13 +200,14 @@ struct ac_context_struct{
 };
 \end{lstlisting}
 %
-For one a context contains the session user that is connected to the database, further it also contains the \emph{invoker} of the query.
+Each context contains the session user that is connected to the database and the \emph{invoker} of the query.
 %
 The invoker is relevant if the query is executed under other privileges than the ones of the session user, this happens for instance when a trigger is executed under \emph{owner's privileges}, which means under the privileges of the user that created the trigger.
 %
-Further a context also contains the query in text form and as a parsed abstract syntax tree.
+A context also contains the query in text form and as a parsed abstract syntax tree.
 %
-Also we included three boolean values: ``authorized'' indicates if the query is authorized, ``rewritten'' tells us if the query was rewritten as part of the access control mechanism, and ``authorizesnext'' is used if the query authorizes the query that is below in the context stack.
+Also we included three boolean values: ``authorized'' indicates if the query is authorized, ``rewritten'' tells us if the query was rewritten as part of the access control mechanism, and ``authorizesnext'' is used if the query authorizes the query that is below in the context stack. 
+\remark{Explain why we need those.}
 %
 The stack is used to simplify the implementation of novel mechanisms such as the one in~\cite{guarnieri2016strong}, since the algorithm from Guarnieri et. al requires knowledge about other aspects of the system such as triggers being executed, or nested queries.
 %
