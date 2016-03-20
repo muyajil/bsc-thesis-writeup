@@ -1,13 +1,40 @@
 \section{Conclusion}
 
-As shown in~\cite{guarnieri2016strong} current database access control mechanisms are not secure.
+As shown in~\cite{guarnieri2016strong}, current database access control mechanisms are not secure.
 %
-Therefore the need for new, stronger access control mechanisms is here and database vendors need to address this fact in the future.
+Therefore, databases need new, stronger access control mechanisms to prevent attacks threatening both database integrity and confidentiality. %is here and database vendors need to address this fact in the future.
 %
-This thesis however, shows that the implementation of such mechanisms might interfere with the database internals, therefore major modifications are needed in existing DBMS such as PostgreSQL on how access control decisions are made.
+In this thesis, we address two main issues that 
 %
-The modifications made to the PostgreSQL internals during this thesis however prepare the implementation of new access control mechanisms by providing developers with a uniform interface and clear code segregation.
+First, we refactor the code of a modern open-source DBMS, namely PostgreSQL, in such a way to ease the implementation of new access control mechanisms.
+%
+The current PostgreSQL's architecture is not adequate to support these new mechanisms, since access control is closely tied with the database internals.
+%
+We performed  major modifications to the PostgreSQL's code addressing access control.
+%
+\remark{A few more information here?}
+%
+These modifications pave the way for the implementation of new access control mechanisms by providing developers with a uniform interface and clear code segregation.
 
+
+Second, we developed an algorithm for deciding whether queries are secure or not.
+%
+Our algorithm directly applies to the SQL language.
+%
+As shown also in~\cite{guarnieri2016strong}, this kind of algorithms is an important building block for novel access control mechanisms that aim at prevent the leakage of sensitive information.
+%
+Existing algorithms, such as those proposed by the SQL standard and implemented in PostgreSQL, are overly restrictive.
+%
+Using them as building blocks for novel mechanisms would result in almost unusable systems.
+%
+Our solution, in contrast, exploits advanced query rewriting techniques to determine whether queries are secure or not. 
+%
+As a result, it is more permissive than existing solutions.
+
+\remark{Conclusion should also discuss future work/possible extension/ lesson learned. How do you think other people will use what you've done.}
+
+
+\remark{Most of this discussion should probably go in the related work section.}
 The algorithms devised in this thesis are constructed under the \emph{Non-truman model}.
 %
 It specifies an access control mechanism as a component which decides if a query is optimized or not, and therefore returns $\bot$ or $\top$.

@@ -15,23 +15,27 @@ This problem is well-known to be undecidable for relational calculus and SQL.~\c
 \subsubsection{Query Containment Approximation}
 
 As shown in Chapter 3, query containment is a key part in access control algorithms such as the one proposed in~\cite{guarnieri2016strong}.
-Since query containment is undecidable, in general, Guarnieri et al. have developed a rule set that produces sound under-approximations of query containment.
-%
-The rules were developed for the relational calculus.
+Since query containment is undecidable, in general, Guarnieri et al. have developed a set of inference rules to compute sound under-approximations of query containment for relational calculus queries.
 %
 Here, we extend them to the SQL language.
 %
-Let $T_i$ denote sequences of tables, $A_i$ sequences of attributes within tables, greek letters stand for boolean expressions, and $Q_i$ \texttt{SELECT} queries as shown in figure~\ref{figure:algorithms:grammar}.
+Figure~\ref{figure:algorithms:grammar} describes the subset of SQL we focus on. 
+%
+In the following, let $T_i$ denote sequences of tables, $A_i$ denote sequences of attributes within tables, greek letters denote for boolean expressions, and $Q_i$ denote \texttt{SELECT} queries.
 
 
 \begin{figure}[!ht]
 
 \begin{tabular}{c c l}
-$A$ & $:=$ & Attributes \\
+$a$ & $:=$ & Attribute identifier \\
     & & \\
-$T$ & $:=$ & Relation $|$ View \\
+$t$ & $:=$ & Relation identifier $|$ View identifier \\ \\
+
+$A$ & $:=$ & $a^*$ \\
     & & \\
-$\phi$ & $:=$ & Boolean expression over attributes $|$ $\top$ \\
+$T$ & $:=$ &  $t^*$ \\
+    & & \\
+$\phi$ & $:=$ & Boolean SQL expression  \\
     & & \\
 $Q$ & $:=$ & \texttt{SELECT $A$ FROM $T$ WHERE $\phi$} \\
     & $|$  & $Q$ \texttt{UNION} $Q$ \\
@@ -39,14 +43,12 @@ $Q$ & $:=$ & \texttt{SELECT $A$ FROM $T$ WHERE $\phi$} \\
     & $|$  & $Q$ \texttt{EXCEPT} $Q$ \\
 
 \end{tabular}
-
+\remark{I've modified a bit the grammar. Checks whether it makes sense.}
 \caption{Grammar of \texttt{SELECT} queries}
 \label{figure:algorithms:grammar}
 \end{figure}
 %
-We define $w(Q)$ as a function, which returns the \texttt{WHERE} clause of the \texttt{SELECT} query $Q$.
-%
-Further we also define $\operatorname{freeV}(Q)$ as a function, which returns the set containing all free variables in the \texttt{SELECT} query $Q$.
+Furthermore, let $w(Q)$ be the function returning the \texttt{WHERE} clause of the \texttt{SELECT} query $Q$, and $\operatorname{freeV}(Q)$ be the fucntion returning the set containing all free variables in the \texttt{SELECT} query $Q$. \remark{? there are no free variables in SQL queries, in general.}
 %
 Figure~\ref{figure:algorithms:infrules} shows our inference rules.
 %
@@ -65,12 +67,19 @@ Figure~\ref{figure:algorithms:infrules} shows our inference rules.
 	{w(Q_1) = w(Q_2) \lor \phi}
 \]
 
-\[
+
+\begin{multline*}
 \infer[\text{PROJ1}]
-	{Q_1' \subseteq Q_2'}
-	{Q_1 \subseteq Q_2 \qquad A_1 \setminus A_1' = A_2 \setminus A_2' \qquad 
-		\lbrace	A_1, A_1', A_2, A_2' \rbrace \subseteq \operatorname{freeV}(Q_1) \cup \operatorname{freeV}(Q_2)}
-\]
+	{\texttt{SELECT}\ A_1\ \texttt{FROM}\ T_1\ \texttt{WHERE}\ \phi_1 \subseteq \texttt{SELECT}\ A_2\ \texttt{FROM}\ T_2\ \texttt{WHERE}\ \phi_2}
+	{
+	\texttt{SELECT}\ A_1'\ \texttt{FROM}\ T_1\ \texttt{WHERE}\ \phi_1 \subseteq \texttt{SELECT}\ A_2'\ \texttt{FROM}\ T_2\ \texttt{WHERE}\ \phi_2 \\
+	\hfill A_1' = a_1^1, \ldots, a_n^2 \hfill \qquad
+	\hfill A_2' = a_1^2, \ldots, a_n^2 \hfill \qquad
+	\hfill 1 \leq j \leq n \hfill \\
+	\hfill A_1 = a_1^1, \ldots, a_{j-1}^1, a_{j+1}^1, \ldots,  a_n^1 \hfill \qquad
+	\hfill A_2 = a_1^2, \ldots, a_{j-1}^2, a_{j+1}^2, \ldots, a_n^2 \hfill 	
+	}
+\end{multline*}
 
 \[
 \infer[\text{PROJ2}]
@@ -78,7 +87,11 @@ Figure~\ref{figure:algorithms:infrules} shows our inference rules.
 	{Q_1 \subseteq Q_2 \qquad T_1 \setminus T_1' = T_2 \setminus T_2'\qquad 
 		\lbrace	T_1, T_1', T_2, T_2' \rbrace \subseteq \operatorname{freeV}(Q_1) \cup \operatorname{freeV}(Q_2)}
 \]
-\remark{Is it ok like this with the definition above?}
+\remark{Are you sure that this rule is sound?? It looks a bit weird to me. If you're sure it's sound, then rewrite it as I've fixed rule PROJ1. (By the way, removing tables from the FROM clause is not called projection in general.)}
+
+
+
+
 
 \[
 \infer[\text{INTER1}]
