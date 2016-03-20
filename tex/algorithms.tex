@@ -1,6 +1,14 @@
 \section{Algorithms}
 
-\remark{Here you should give some intuition why we're dealing with query containment for security}
+As shown in~\cite{guarnieri2014optimal} query containment is a fundamental problem in database security.
+%
+Database access control policies specify how data can be accessed by the database users.
+%
+We can interpret this as assigning each database user a filter, this filter then specifies which actions the user can apply to which tuples of the database.
+%
+Query containment enables us to argue about the execution of queries in the presence of access control policies.
+%
+\remark{I have tried to just give a teaser on the problem here, in the next section we introduce it, and then we see how we can apply it. What do you think?}
 
 \subsection{Query Containment}
 
@@ -45,12 +53,11 @@ $Q$ & $:=$ & \texttt{SELECT $A$ FROM $T$ WHERE $\phi$} \\
     & $|$  & $Q$ \texttt{EXCEPT} $Q$ \\
 
 \end{tabular}
-\remark{I've modified a bit the grammar. Checks whether it makes sense.}
 \caption{Grammar of \texttt{SELECT} queries}
 \label{figure:algorithms:grammar}
 \end{figure}
 %
-Furthermore, let $w(Q)$ be the function returning the \texttt{WHERE} clause of the \texttt{SELECT} query $Q$, and $\operatorname{freeV}(Q)$ be the fucntion returning the set containing all free variables in the \texttt{SELECT} query $Q$. \remark{? there are no free variables in SQL queries, in general.}
+Furthermore, let $w(Q)$ be the function returning the \texttt{WHERE} clause of the \texttt{SELECT} query $Q$.
 %
 Figure~\ref{figure:algorithms:infrules} shows our inference rules.
 %
@@ -71,7 +78,7 @@ Figure~\ref{figure:algorithms:infrules} shows our inference rules.
 
 
 \begin{multline*}
-\infer[\text{PROJ1}]
+\infer[\text{PROJ}]
 	{\texttt{SELECT}\ A_1\ \texttt{FROM}\ T_1\ \texttt{WHERE}\ \phi_1 \subseteq \texttt{SELECT}\ A_2\ \texttt{FROM}\ T_2\ \texttt{WHERE}\ \phi_2}
 	{
 	\texttt{SELECT}\ A_1'\ \texttt{FROM}\ T_1\ \texttt{WHERE}\ \phi_1 \subseteq \texttt{SELECT}\ A_2'\ \texttt{FROM}\ T_2\ \texttt{WHERE}\ \phi_2 \\
@@ -83,17 +90,7 @@ Figure~\ref{figure:algorithms:infrules} shows our inference rules.
 	}
 \end{multline*}
 
-\[
-\infer[\text{PROJ2}]
-	{Q_1' \subseteq Q_2'}
-	{Q_1 \subseteq Q_2 \qquad T_1 \setminus T_1' = T_2 \setminus T_2'\qquad 
-		\lbrace	T_1, T_1', T_2, T_2' \rbrace \subseteq \operatorname{freeV}(Q_1) \cup \operatorname{freeV}(Q_2)}
-\]
-\remark{Are you sure that this rule is sound?? It looks a bit weird to me. If you're sure it's sound, then rewrite it as I've fixed rule PROJ1. (By the way, removing tables from the FROM clause is not called projection in general.)}
-
-
-
-
+\remark{Is $A_1'$ and $A_1$ in the wrong way here? I understand it that $A_1$ is all the attributes, and in $A_1'$ we remove the jth attribute right? Same for $A_2$}
 
 \[
 \infer[\text{INTER1}]
@@ -127,59 +124,60 @@ Figure~\ref{figure:algorithms:infrules} shows our inference rules.
 \caption{Inference Rules for query containment}
 \label{figure:algorithms:infrules}
 \end{figure}
-
-\remark{Explain each ``family'' of rules. Give some intuition, and explain why they are sound.
 %
-I'd avoid saying ``holds trivially'' too much, as it downplays your contribution.}
-
 The ID-rule holds trivially.
 %
-In the AND-rule we restrict the resulting bag further by adding a boolean expression in conjunction. 
+In the AND-rule and OR-rule we modify the \texttt{WHERE} clause of a \texttt{SELECT} query.
 %
-Therefore the rule holds.
+For any of the tuples returned from a \texttt{SELECT} query the \texttt{WHERE} clause must evaluate to $\top$, therefore we filter out all tuples that do not satisfy the \texttt{WHERE} clause.
 %
-The OR-rule holds by the same argumentation, namely we extend the resulting bag, by adding a boolean expression in disjunction,  which increases the number of tuples satisfying the \texttt{WHERE} clause. \remark{This part is unclear.}
+In the AND-rule we restrict this filter further by adding another boolean expression in conjunction.
 %
-The PROJ1-rule is valid since we project out the same set of attributes. Therefore the actual rows returned from the table are the same, with less attributes.
+In the OR-rule however, we widen the filter by adding a boolean expression in disjunction.
+
+A requirement that one query can be contained in the other is that both queries use the same projections, i.e., the same attribute list.
 %
-\remark{I am not perfectly sure about the PROJ rules. This is the intuition, but make it clearer.}
+Tuples resulting from two queries with different attribute lists are not comparable, since they can never be equal.
 %
-The PROJ2-rule holds since we reduce the multiset of tuples from which we select by the same tuples in both queries.
+In the PROJ-rule we remove the same attribute from both attribute lists, therefore the actual tuples returned are the same, which means containment still holds.
+
+In SQL queries return bags and not sets.
 %
-By combining PROJ1 and PROJ2 we get the rule PROJ3.
+Bags however, support the same operations as sets, in particular they support $\cap, \cup, \setminus$.
 %
-The rules INTER1 and INTER2 hold trivially, by the definition of intersecting two multisets.
+SQL therefore allows to apply these operation to queries.
 %
-The same argumentation holds for the rules UNION1 and UNION2, which rely on the definition of unifying multisets.
+The rules INTER1 and INTER2 hold since we know that the intersection of two bags contains all elements that appear in both bags.
+%
+Therefore the intersection must be a subset of both initial bags.
+%
+The union of two bags contains all elements that appear in at least one of the intial bags, therefore we can follow that both inital bags are contained in the union.
 %
 The rule EXCEPT holds by the definition of subtracting multisets.
-%
+
 Lastly the rule TRANS holds by the definition of containment.
 
 \FloatBarrier
 \subsection{Checking security of \texttt{SELECT} queries}
 
-As seen in Chapter 2 \texttt{SELECT} queries are trivially authorized \remark{authorized by the SQL query?} if the user that issues the query has read privileges on all the referenced tables.
+As seen in Chapter 2 \texttt{SELECT} queries are trivially authorized by the access control mechanism if the user that issues the query has read privileges on all the referenced tables.
 %
 However this mechanism is too restrictive for implementing a powerful mechanism such as the one presented in~\cite{guarnieri2016strong}.
 %
 The authors of~\cite{guarnieri2016strong} have developed an algorithm that checks the security of queries, which relies on query containment and query rewriting. 
+
+For each table or view $T$, we denote by $T^\top$ (respectively $T^\bot$) the set of tables or views that are contained in (respectively contain) $T$.
 %
-For each query $Q$ the rewriting algorithm produces a secure over-approximation $Q^\bot$ and under-approximation $Q^\top$ with respect to query containment, using the rule set introduced above. \remark{This part is unclear. The under and over-approximations are not computed using the rules.}
+This set is computed using the query containment rules introduced in Section 5.1.1.
 %
-\remark{This part is unclear. Why don't you just say something like ``For each table or view $O$, we denote by $O^\top$ (respectively $O^\bot$) the set ... . This set is computed using the query containment rules introduced in Section XX''} 
+
+Here we use these sets to provide the same rewriting as in~\cite{guarnieri2016strong}, but for SQL.
 %
-The extended rule set is used to create two mappings within the database.
-%
-We map all tables or views $T$ to the set $T^\bot$, which contains all tables or views that contain $T$ based on the above inference rules.
-%
-In the same way we map each table or view $T$ to the set $T^\top$, which contain all tables or views that are contained by $T$.
-%
-Here we use these mappings to provide the same rewriting as in~\cite{guarnieri2016strong}, but for SQL.
+For each query $Q$ the rewriting algorithm produces a secure over-approximation $Q^\bot$ and under-approximation $Q^\top$ of the query.
 
 \subsubsection{Rewriting Algorithm}
 %
-Our rewriting algorithm is shown in Algorithm~\ref{alg:algorithms:rewrite}. % shows a pseudo code of the implementation.
+Our rewriting algorithm is shown in Algorithm~\ref{alg:algorithms:rewrite}.
 %
 The algorithm returns the two queries $Q^\bot$ and $Q^\top$.
 %
@@ -187,18 +185,13 @@ The query $Q^\bot$ is built by replacing each referenced table $T$ by the inters
 %
 $Q^\top$ is built analogously with unions of all the tables $\tau \in T^\top$.
 %
-We further define the helper function \emph{$S$.hasNext()}, which returns false if the table $\tau$ is the last one in the set $S$ and true otherwise. \remark{hasNext does not make any sense for a set (no order)}
+We further define the helper function \emph{$S$.card()}, which returns the cardinality of the set $S$.
 
-
-
-\remark{Explain this part a bit more.}
+Since we only consider tables or views from $T^\top$ and $T^\bot$, which, according to the access control policy, are readable to the user, it follows that any query constructed by the rewriting algorithm is secure.
 %
 Therefore it is trivial that both queries $Q^\bot$ and $Q^\top$ are secure, since all the tables referenced within are readable to the user issuing the query.
-%
-Using the inference rules we can further show that for any query $Q$ it holds that $Q^\top \subseteq Q \subseteq Q^\bot$.
-%
-\remark{I'm pretty sure you cannot prove this using our rules.}
 
+We can further argue that $Q^\top \subseteq Q \subseteq Q^\bot$ since the rewriting algorithm approximates the results of $Q$ from below and above. 
 %
 \begin{algorithm}
 \caption{Rewriting Algorithm for SQL queries}
@@ -211,17 +204,21 @@ Using the inference rules we can further show that for any query $Q$ it holds th
 	\ForEach{table $T$ referenced in $Q$}{
 		$T'$ = "("\;
 		$T''$ = "("\;
+		numBot = $T^\bot.card()$\;
+		numTop = $T^\top.card()$\;
 		\ForEach{table $\tau$ in $T^\bot$}{
+			numBot--\;
 			\If{$u$ is authorized to read $\tau$}
-				{\eIf{$T^\bot$.hasNext()}
+				{\eIf{numBot > 0}
 					{$T'$ += "\texttt{(SELECT * FROM $\tau$) INTERSECTION}"\;}
 					{$T'$ += "\texttt{(SELECT * FROM $\tau$)}"\;}
 				}
 		}
      	
 		\ForEach{table $\tau$ in $T^\top$}{
+		    numTop--\;
 			\If{$u$ is authorized to read $\tau$}
-				{\eIf{$T^\top$.hasNext()}
+				{\eIf{numTop > 0}
 					{$T''$ += "\texttt{(SELECT * FROM $\tau$) UNION}"\;}
 					{$T''$ += "\texttt{(SELECT * FROM $\tau$)}"\;}
 				}
@@ -337,7 +334,7 @@ Our implementation contains a subset of the introduced inference rules for conta
 Algorithm~\ref{alg:algorithms:authtruman} shows how our algorithm can be extended to the Truman model.
 %
 \begin{algorithm}
-\caption{Authorization algorithm for \texttt{SELECT} queries}
+\caption{Authorization algorithm for \texttt{SELECT} queries in the Truman model}
 \label{alg:algorithms:authtruman}
 	\SetAlgoLined
 	\KwData{Query $Q$, user $u$}
