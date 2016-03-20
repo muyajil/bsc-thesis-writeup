@@ -207,18 +207,18 @@ We can further argue that $Q^\top \subseteq Q \subseteq Q^\bot$ since the rewrit
 		numBot = $T^\bot.card()$\;
 		numTop = $T^\top.card()$\;
 		\ForEach{table $\tau$ in $T^\bot$}{
-			numBot--\;
+			numBot$--$\;
 			\If{$u$ is authorized to read $\tau$}
-				{\eIf{numBot > 0}
+				{\eIf{numBot $>$ 0}
 					{$T'$ += "\texttt{(SELECT * FROM $\tau$) INTERSECTION}"\;}
 					{$T'$ += "\texttt{(SELECT * FROM $\tau$)}"\;}
 				}
 		}
      	
 		\ForEach{table $\tau$ in $T^\top$}{
-		    numTop--\;
+		    numTop$--$\;
 			\If{$u$ is authorized to read $\tau$}
-				{\eIf{numTop > 0}
+				{\eIf{numTop $>$ 0}
 					{$T''$ += "\texttt{(SELECT * FROM $\tau$) UNION}"\;}
 					{$T''$ += "\texttt{(SELECT * FROM $\tau$)}"\;}
 				}
@@ -307,19 +307,19 @@ From the example above the authorization algorithm will execute the following qu
  (SELECT * FROM OldProgrammer))
 \end{verbatim}
 \noindent
-It is obvous that the query will return $\emptyset$, therefore the algorithm will authorize the query $Q = $ \texttt{SELECT * FROM Programmer} $\blacksquare$.
+It is obvious that the query will return $\emptyset$, therefore the algorithm will authorize the query $Q = $ \texttt{SELECT * FROM Programmer} $\blacksquare$.
 
 \paragraph{Extension to the Truman model}
 
 The algorithms devised in this chapter are constructed under the \emph{Non-truman model}.
 %
-Identified in~\cite{rizvi2004extending} it specifies an access control mechanism as a component which decides if a query is optimized or not, and therefore returns $\bot$ or $\top$.
+Identified in~\cite{rizvi2004extending} it specifies an access control mechanism as a component which decides if a query is authorized or not, and therefore returns $\bot$ or $\top$.
 %
 The current implementations of these mechanisms either interrupt the execution of the query and notify the user if a query was not authorized or do not interrupt the execution of the query if the query was authorized.
 %
 The Non-truman model is the most used model in database access control mechanisms.
 %
-The \emph{Truman model} however, uses access control mechanisms with another approach, namely the access control internally executes the query, and only returns the tuples, which are readable for the user according to the access control policy.
+The \emph{Truman model} however, uses access control mechanisms with another approach, namely the access control mechanism internally executes the query, and only returns the tuples, which are readable for the user according to the access control policy.
 %
 The user issuing a query will not notice if the query he issued is not authorized for him.
 %
