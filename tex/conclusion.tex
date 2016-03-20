@@ -2,7 +2,7 @@
 
 As shown in~\cite{guarnieri2016strong}, current database access control mechanisms are not secure.
 %
-Therefore, databases need new, stronger access control mechanisms to prevent attacks threatening both database integrity and confidentiality. %is here and database vendors need to address this fact in the future.
+Therefore, databases need new, stronger access control mechanisms to prevent attacks threatening both database integrity and confidentiality.
 %
 In this thesis, we address two main issues that 
 %
@@ -12,7 +12,9 @@ The current PostgreSQL's architecture is not adequate to support these new mecha
 %
 We performed  major modifications to the PostgreSQL's code addressing access control.
 %
-\remark{A few more information here?}
+We changed the behaviour of certain Backend modules such as the executor, further we moved all access control relevant code to a stand-alone module. 
+%
+Moreover we created an interface to said module.
 %
 These modifications pave the way for the implementation of new access control mechanisms by providing developers with a uniform interface and clear code segregation.
 
@@ -31,10 +33,12 @@ Our solution, in contrast, exploits advanced query rewriting techniques to deter
 %
 As a result, it is more permissive than existing solutions.
 
-\remark{Conclusion should also discuss future work/possible extension/ lesson learned. How do you think other people will use what you've done.}
+As shown in Chapter 5 our algorithm is easy extensible to support the Truman model.
+%
+However, the implementation of the Truman model would require further changes to the executor and transistions between modules.
+%
+Future work can include the improvement of the rewriting algorithm, such that it generates better approximations, by implementing all inference rules from Chapter 5.
 
-
-\remark{Most of this discussion should probably go in the related work section.}
-
-
-\remark{on what do we want to focus further here?}
+This thesis provides a first step on a long way to implement stronger database access control mechanisms.
+%
+Further it also allows to tackle this way step by step by providing a mechanism that can gradually be changed to support more query types, such as, \texttt{INSERT}, \texttt{UPDATE}, or \texttt{GRANT}.
