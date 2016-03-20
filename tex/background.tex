@@ -8,28 +8,39 @@ The conclusions made in the following paragraphs are backed by an analysis of th
 
 %In SQL access control model database users have privileges.
 The SQL standard defines a number of privileges, where each privilege represents an operation that can be done in the database, such as creating tables, creating triggers, or updating tables.
-%
-The privileges can be assigned to users using \texttt{GRANT} commands and revoked using \texttt{REVOKE} commands.
-%
-Note that the execution of  \texttt{GRANT} and \texttt{REVOKE} is regulated as well by the access control policy. \remark{Add some more information?}%the user issuing these queries, must have the privilege to delegate privileges to other users.
-%
-At the beginning of the execution of a DBMS this is the database administrator. \remark{This sentence does not make any sense}
-%
-Privileges can be assigned either to the database or to a \emph{database object}. \remark{Privileges can be assigned only to users. However, one can assign privileges ON the database, such as CREATE TABLE), or ON a specific database object, e.g., INSERT ON table.}
+
+Privileges can be assigned either on the database or on a \emph{database object}.
 %
 A database object refers to an internal structure of the database, such as a table, a trigger, or a view. 
 %
+When a user creates a database object, he is the owner of the object and therefore intrinsically receives all privileges on this object, including the privilege to delegate those to other users.
+%
+The privileges can be assigned to users using \texttt{GRANT} commands and revoked using \texttt{REVOKE} commands.
+%
+Note that the execution of  \texttt{GRANT} and \texttt{REVOKE} is regulated as well by the access control policy. 
+%
+A \texttt{GRANT} or \texttt{REVOKE} query on some database object is authorized if the user issuing the query is the database administrator, the owner of the database object, or if the user holds a \emph{grant option} on the privilege he is trying to assing or revoke.
+%
+A grant option can be assigned to a user together with a privilege.
+%
+The grant option gives the user the ability to delegate a privilege further.
 
-\remark{I guess this part is related to PostgreSQL. If that's the case, then start with ``In PostgreSQL, the SQL access control model is implemented as follows.''}
-Privileges are encoded using \emph{access control lists} (ACLs). \remark{Explain ACL} 
+In PostgreSQL, the SQL access control model is implemented as follows.
 %
-Each ACL specifies the privileges for each \emph{database role}. \remark{This is the first time you talk about database roles. Before you said privileges are assigned to users. What is the connection between roles and users. Are roles part of SQL?}
+To simplify the creation of access control policies PostgreSQL supports the use of \emph{database roles}.
 %
-A database role can be either a single database user, a group of group of database users, or public. \remark{explain public} 
+A database role can be either a single database user, a group of database users, or public. 
 %
 Groups of database users are used to manage privileges in bulk for users that enjoy similar privileges.
 %
-When a user creates a database object, he is the owner of the object and therefore intrinsically receives all privileges on this object, including the privilege to delegate those to other users.
+If a user was not assinged any specific privileges on a database objects either through group membership or directly, he automatically has all the privileges that are assigned to public.
+%
+Privileges are encoded using \emph{access control lists} (ACLs).
+%
+ACLs consist of several bitmasks.
+%
+Each bitmask represents the privileges assinged to a database role, further each bit within the mask represents one privilege.
+%
 
 \subsection{Implementation in PostgreSQL}
 
