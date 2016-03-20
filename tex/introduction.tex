@@ -9,27 +9,27 @@ This is \emph{essential} to effectively secure database systems and prevent the 
 
 The access control mechanism proposed in the SQL standard, and implemented in the PostgreSQL DBMS, is rather simple.
 %
-It just relies on syntactic checks to determine whether the submitted \texttt{SELECT} query is secure.
+It relies on syntactic checks to determine whether the submitted \texttt{SELECT} query is secure.
 %
 In more detail, a \texttt{SELECT} query $q$ is deemed secure if the user issuing $q$ is authorized to read, according to the access control policy, all the tables and views referenced in $q$. % are readable to , according to the access control policy.
 %
 This mechanism is overly restrictive.
 %
-Indeed, as already identified in~\cite{rizvi2004extending, guarnieri2014optimal, wang2007correctness,zhang2005authorizations}, even queries not satisfying this criterion are secure.
+Indeed, as already identified in~\cite{guarnieri2014optimal,rizvi2004extending, wang2007correctness,zhang2005authorizations}, even queries not satisfying this criterion are secure.
 
-Recently, Guarnieri et al.~\cite{guarnieri2016strong} investigated the limitations of SQL's access control model and accordingly  developed a novel, more secure, access control mechanism.
+Recently, Guarnieri et al.~\cite{guarnieri2016strong} investigated the limitations of SQL's access control model and  developed a novel, more secure, access control mechanism.
 %
 The main building block of this mechanism is an algorithm for checking the security of \texttt{SELECT} queries.
 %
 This algorithm is used not only to decide whether \texttt{SELECT} queries are authorized or not, but also to determine whether all the other commands may leak sensitive information. 
 %
-Using naive algorithms, such as those proposed in the SQL standard, for this would result in an extremely unusable system, due to their restrictiveness.
+The use of naive and restrictive algorithms, such as those proposed in the SQL standard, as a building block for novel strong access control mechanisms would result in an extremely unusable system.
 %
 Motivated by this, Guarnieri et al. developed a more permissive algorithm, based on query rewriting, for checking the security of \texttt{SELECT} queries.
 
-The algorithm proposed in~\cite{guarnieri2016strong} however, has two main practical limitations.
+The algorithm proposed in~\cite{guarnieri2016strong}, however, has two main practical limitations.
 %
-First, it is based on the relational calculus, whereas existing DBMSs are based on SQL. Despite SQL being inspired by the relational calculus it differs from it in significant ways. For instance, it has a different syntax and semantics, e.g., SQL uses a bag semantics whereas the relational calculus relies on a set-based semantics.
+First, it is based on the relational calculus, whereas existing DBMSs are based on SQL. Despite SQL being inspired by the relational calculus, the former differs from the latter in significant ways. For instance, SQL has a different syntax and semantics, e.g., it uses a bag semantics whereas the relational calculus relies on a set-based semantics.
 %
 Second, it is defined primarily for boolean queries, whereas \texttt{SELECT} queries usually retrieve tuples.
 %
@@ -44,20 +44,30 @@ Our algorithm extends the one proposed by Guarnieri et al. to the SQL language a
 \noindent
 {\bf Contributions.}
 %
+\remark{The rest of the introduction is good. We still have to sharpen a bit the contribution.
+%
+It is currently still unclear why what you did is a contribution.
+%
+How you improved the state of the art? Why people should build on top of this stuff?
+%
+To make the presentation easier, I'd structure this section as follows: One/two brief sentences outlining the problem. Then just say something like "In this respect, we made the following contributions". Then, two paragraphs, one per contribution explaining how these things improve the state of the art. You can even start these paragraphs as "First, we did X. ...", "Second, we did Y...."}
+
+
+%
 Guarnieri et al. have tested the security of access control mechanisms in various DBMSs in~\cite{guarnieri2016strong}.
 %
-According to their findings PostgreSQL is the most vulnerable DBMS, therefore we have decided on PostgreSQL for implementing the new access control mechanism for \texttt{SELECT} queries.
+According to their findings PostgreSQL is the most vulnerable DBMS, therefore we have decided on PostgreSQL for implementing the new access control mechanism for \texttt{SELECT} queries. \remark{These two sentences are a bit weird.}
 
-As we will see in Chapter 4 the current architecture of PostgreSQL makes it difficult to implement such a new algorithm.
+The current architecture of PostgreSQL makes it difficult to implement such a new algorithm.
 %
-Therefore first, we refactor the original PostgreSQL's implementation to isolate the access control mechanism and provide a general interface for access requests, independent of the type of query.
+Therefore, we refactor the original PostgreSQL's implementation to isolate the access control mechanism and provide a general interface for access requests, independent of the type of query.
 %
 The original implementation requires a deep understanding of the backend architecture of PostgreSQL to be able to extend and improve the current access control algorithm.
 %
 Our refactoring provides the possibility of improving and extending access control without interfering with the internals of the DBMS.
 %
 
-Second, we extend the access control mechanism proposed by Guarnieri et al.~\cite{guarnieri2016strong} to SQL.
+Second, we extend the access control mechanism proposed by Guarnieri et al.~\cite{guarnieri2016strong} to SQL. \remark{Which mechanism? This sounds like claiming the whole mechanism as contribution.}
 %
 This is essential to effectively secure PostgreSQL and prevent leakages of sensitive information.
 %

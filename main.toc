@@ -1,21 +1,21 @@
 \contentsline {section}{\numberline {1}Introduction}{2}{section.1}
-\contentsline {section}{\numberline {2}Motivating Example}{4}{section.2}
-\contentsline {section}{\numberline {3}Background}{5}{section.3}
-\contentsline {subsection}{\numberline {3.1}SQL access control model}{5}{subsection.3.1}
-\contentsline {subsection}{\numberline {3.2}Implementation in PostgreSQL}{5}{subsection.3.2}
-\contentsline {subsection}{\numberline {3.3}Algorithm proposed by Guarnieri et al.}{6}{subsection.3.3}
-\contentsline {section}{\numberline {4}Architecture}{7}{section.4}
-\contentsline {subsection}{\numberline {4.1}Current architecture}{7}{subsection.4.1}
-\contentsline {subsubsection}{\numberline {4.1.1}Backend architecture}{7}{subsubsection.4.1.1}
-\contentsline {subsubsection}{\numberline {4.1.2}Access Control}{8}{subsubsection.4.1.2}
-\contentsline {subsection}{\numberline {4.2}Refactoring}{10}{subsection.4.2}
-\contentsline {section}{\numberline {5}Algorithms}{13}{section.5}
-\contentsline {subsection}{\numberline {5.1}Query Containment}{13}{subsection.5.1}
-\contentsline {subsubsection}{\numberline {5.1.1}Query Containment Approximation}{13}{subsubsection.5.1.1}
-\contentsline {subsection}{\numberline {5.2}Checking security of \texttt {SELECT} queries}{15}{subsection.5.2}
-\contentsline {subsubsection}{\numberline {5.2.1}Rewriting Algorithm}{16}{subsubsection.5.2.1}
-\contentsline {subsubsection}{\numberline {5.2.2}Authorization of \texttt {SELECT} queries}{18}{subsubsection.5.2.2}
-\contentsline {paragraph}{Extension to the Truman model}{19}{section*.2}
-\contentsline {section}{\numberline {6}Related Work}{20}{section.6}
-\contentsline {section}{\numberline {7}Conclusion}{21}{section.7}
-\contentsline {section}{References}{22}{section.7}
+\contentsline {section}{\numberline {2}Motivating Example}{5}{section.2}
+\contentsline {section}{\numberline {3}Background}{6}{section.3}
+\contentsline {subsection}{\numberline {3.1}SQL access control model}{6}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Implementation in PostgreSQL}{6}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}Algorithm proposed by Guarnieri et al.}{7}{subsection.3.3}
+\contentsline {section}{\numberline {4}Architecture}{8}{section.4}
+\contentsline {subsection}{\numberline {4.1}Current architecture}{8}{subsection.4.1}
+\contentsline {subsubsection}{\numberline {4.1.1}Backend architecture}{8}{subsubsection.4.1.1}
+\contentsline {subsubsection}{\numberline {4.1.2}Access Control}{9}{subsubsection.4.1.2}
+\contentsline {subsection}{\numberline {4.2}Refactoring}{11}{subsection.4.2}
+\contentsline {section}{\numberline {5}Algorithms}{14}{section.5}
+\contentsline {subsection}{\numberline {5.1}Query Containment}{14}{subsection.5.1}
+\contentsline {subsubsection}{\numberline {5.1.1}Query Containment Approximation}{14}{subsubsection.5.1.1}
+\contentsline {subsection}{\numberline {5.2}Checking security of \texttt {SELECT} queries}{16}{subsection.5.2}
+\contentsline {subsubsection}{\numberline {5.2.1}Rewriting Algorithm}{17}{subsubsection.5.2.1}
+\contentsline {subsubsection}{\numberline {5.2.2}Authorization of \texttt {SELECT} queries}{19}{subsubsection.5.2.2}
+\contentsline {paragraph}{Extension to the Truman model}{20}{section*.2}
+\contentsline {section}{\numberline {6}Related Work}{21}{section.6}
+\contentsline {section}{\numberline {7}Conclusion}{22}{section.7}
+\contentsline {section}{References}{23}{section.7}

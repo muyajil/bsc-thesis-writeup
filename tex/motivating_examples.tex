@@ -27,7 +27,7 @@ This query will not be authorized by the current access control mechanism implem
 %
 Since however $u$ has access to the views \texttt{OldProgrammers} and \texttt{YoungProgrammers} he can issue the query $Q_1 := $ \texttt{(SELECT * FROM OldProgrammers) UNION (SELECT * FROM YoungProgrammers)}, which in turn will be authorized by the access control mechanism in PostgreSQL.
 %
-Also the query $Q_2 := $ \texttt{(SELECT * FROM ProgrammerOrClerk) INTERSECTION (SELECT * FROM ProgrammerOrHR)} will be authorized by PostgreSQL.
+Also the query $Q_2 := $ \texttt{(SELECT * FROM ProgrammerOrClerk) INTERSECTION (SELECT * FROM ProgrammerOrHR)} \\ will be authorized by PostgreSQL.
 %
 It is obvious that all three queries return the same results.
 %
