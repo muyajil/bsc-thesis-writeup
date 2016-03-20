@@ -1,8 +1,34 @@
 \begin{thebibliography}{1}
 
+\bibitem{abiteboul1995foundations}
+S.~Abiteboul, R.~Hull, and V.~Vianu.
+\newblock {\em Foundations of databases}, volume~8.
+\newblock Addison-Wesley Reading, 1995.
+
+\bibitem{guarnieri2014optimal}
+M.~Guarnieri and D.~Basin.
+\newblock Optimal security-aware query processing.
+\newblock In {\em Proc. 2014 Int. Conf. Very Large Data Bases}.
+
 \bibitem{guarnieri2016strong}
 M.~Guarnieri, S.~Marinovic, and D.~Basin.
 \newblock Strong and provably secure database access control.
 \newblock In {\em Proc.~2016 IEEE European Symp. Security and Privacy}, 2016.
+
+\bibitem{rizvi2004extending}
+S.~Rizvi, A.~Mendelzon, S.~Sudarshan, and P.~Roy.
+\newblock Extending query rewriting techniques for fine-grained access control.
+\newblock In {\em Proc. 2004 ACM Int. Conf. Management of data}.
+
+\bibitem{wang2007correctness}
+Q.~Wang, T.~Yu, N.~Li, J.~Lobo, E.~Bertino, K.~Irwin, and J.-W. Byun.
+\newblock On the correctness criteria of fine-grained access control in
+  relational databases.
+\newblock In {\em Proc. 2007 Int. Conf. Very Large Data Bases}.
+
+\bibitem{zhang2005authorizations}
+Z.~Zhang and A.~O. Mendelzon.
+\newblock Authorization views and conditional query containment.
+\newblock In {\em Proc. of the 2005 Int. Conf. Database Theory}.
 
 \end{thebibliography}

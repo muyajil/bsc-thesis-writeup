@@ -1,16 +1,21 @@
 \section{Motivating Example}
 
-As mentioned in the Introduction we have implemented a more permissive and equally secure mechanism to decide the authorization of \texttt{SELECT} queries.
+%As mentioned in the Introduction we have implemented a more permissive and equally secure mechanism to decide the authorization of \texttt{SELECT} queries.
+%%
+%The following example should demonstrate this mechanism for a simple database.
+
+Here, we illustrate, using an example, the limitations how the algorithm proposed by the SQL standard for determining whether \texttt{SELECT} queries are secure.
 %
-The following example should demonstrate this mechanism for a simple database.
+We also show how our algorithm will address these limitations.
+
 
 \smallskip
 \noindent
 {\bf Example:}
 %
-Consider a database with tables \texttt{Programmers}, \texttt{Clerks}, and \texttt{HR}, containing the information of employees of the respective departements.
+Consider a database with three tables \texttt{Programmers}, \texttt{Clerks}, and \texttt{HR}, containing the information of employees of the respective departements.
 %
-Further the database contains the following views:
+Assume, furthermore, that the database contains the following views:
 \begin{itemize}
 	\item \texttt{OldProgrammers} defined as \\ \texttt{SELECT * FROM Programmers WHERE Age > 40}
 	\item \texttt{YoungProgrammers} defined as \\ \texttt{SELECT * FROM Programmers WHERE Age <= 40}
