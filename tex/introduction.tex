@@ -1,5 +1,5 @@
 \section{Introduction}
-To protect the confidentiality of sensitive information stored in databases, it is essential to restrict access to the data.
+To protect the confidentiality of sensitive information stored in databases, it is essential to restrict access to the stored data.
 %
 For this, the SQL standard defines an access control model, and existing Database Management Systems (DBMSs) have accordingly implemented it. 
 %
@@ -33,7 +33,7 @@ First, it is based on the relational calculus, whereas existing DBMSs are based 
 %
 Second, it is defined primarily for boolean queries, whereas \texttt{SELECT} queries usually retrieve tuples.
 %
-Even though boolean queries can be used to encode the result of non-boolean queries, this encoding may introduce a exponential blow-up in the formula's size.
+Even though boolean queries can be used to encode the result of non-boolean queries, this encoding may introduce an exponential blow-up in the formula's size.
 
 Motivated by the idea of extending the mechanism from~\cite{guarnieri2016strong} to the entire SQL language, in this thesis we develop a novel algorithm for checking the security of \texttt{SELECT} queries.
 %
@@ -45,7 +45,7 @@ Our algorithm extends the one proposed by Guarnieri et al. to the SQL language a
 %
 Guarnieri et al. have tested the security of access control mechanisms in various DBMSs in~\cite{guarnieri2016strong}.
 %
-According to their findings PostgreSQL is the most vulnerable DBMS, therefore we have decided that implementing the new access control mechanism for \texttt{SELECT} queries.
+According to their findings PostgreSQL is the most vulnerable DBMS, therefore we have decided on PostgreSQL for implementing the new access control mechanism for \texttt{SELECT} queries.
 
 As we will see in Chapter 4 the current architecture of PostgreSQL makes it difficult to implement such a new algorithm.
 %
