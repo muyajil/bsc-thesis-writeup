@@ -70,13 +70,6 @@ A plan is detailed guide for the executor on how to retrieve the tuples.
 
 This plan is then forwarded to the executor, which will execute it and return the tuples to the frontend application.
 %
-\begin{figure}[!ht]
-  \centering
-    \includegraphics[width=1\textwidth]{img/backend_flowchart.png}
-    \caption{Backend Flowchart PostgreSQL \protect \footnotemark}\label{figure:postgresql:architecture}
-\end{figure}
-%
-\footnotetext{\url{http://www.postgresql.org/developer/backend}}
 \subsubsection{Access Control}
 %
 Access control decisions can be made in any of the the following modules: Traffic cop, Executor, or in the module that handles the utility queries.
@@ -94,6 +87,16 @@ This check is on an internal datastructure that represents the tables referenced
 Therefore, we need to modify the behaviour of the executor just to modify the way \texttt{SELECT} queries are authorized.
 %
 This fact motivated us to refactor PostgreSQL in a way that allows for the implementation of new access control mechanisms, without interfering with the internals of the DBMS.
+
+\newpage
+%
+\begin{figure}[!ht]
+  \centering
+    \includegraphics[width=1\textwidth]{img/backend_flowchart.png}
+    \caption{Backend Flowchart PostgreSQL \protect \footnotemark}\label{figure:postgresql:architecture}
+\end{figure}
+%
+\footnotetext{\url{http://www.postgresql.org/developer/backend}}
 %
 \FloatBarrier
 
