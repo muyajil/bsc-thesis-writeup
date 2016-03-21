@@ -58,6 +58,7 @@ The original PostgreSQL's implementation requires a deep understanding of the ba
 %
 Developers can use the refactored version of PostgreSQL to implement new, stronger access control mechanisms, without needing to modify the internals of PostgreSQL.
 
+%<<<<<<< HEAD
 %Important parts of the new access control mechanism proposed by Guarnieri et al. a query rewriting algorithm, and a function which decides the authorization of \texttt{SELECT} queries in the relational calculus. \remark{this sentence doesn't make any sense.}
 
 
@@ -66,6 +67,9 @@ Second, we developed a new access control mechanism for \texttt{SELECT} queries.
 Our mechanism extends the access control mechanism proposed by Guarnieri et al.~\cite{guarnieri2016strong} from the relational calculus to SQL.
 %
 %As a second contribution we extended these parts of the access control mechanism from~\cite{guarnieri2016strong} to SQL.
+%=======
+%Important parts of the new access control mechanism proposed by Guarnieri et al. are a query rewriting algorithm, and a function which decides the authorization of \texttt{SELECT} queries in the relational calculus.
+%>>>>>>> 65bfb5f36d8a39129e1e1cea2ab46bbcf1c487d4
 %
 %This is essential to effectively secure PostgreSQL and prevent leakages of sensitive information. 
 %
