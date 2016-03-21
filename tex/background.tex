@@ -8,7 +8,7 @@ The conclusions made in the following paragraphs are backed by an analysis of th
 
 The SQL standard defines a number of privileges, where each privilege represents an operation that can be performed in the database, such as creating tables, creating triggers, or updating tables.
 
-Privileges can be assigned either on the database or on a \emph{database object}. \remark{Isn't the database object an integral part of the privilege? The privilege is SELECT ON TABLE, not just SELECT.}
+There are two types of privileges, on the one hand there are privileges that can be assigned to the database such as \texttt{CREATE TABLE}, on the other hand there are privileges that are applicable to \emph{database objects} such as \texttt{SELECT ON TABLE}.
 %
 A database object refers to an internal structure of the database, such as a table, a trigger, or a view. 
 %
@@ -18,11 +18,13 @@ The privileges can be assigned to users using \texttt{GRANT} commands and revoke
 %
 Note that the execution of  \texttt{GRANT} and \texttt{REVOKE} is regulated as well by the access control policy. 
 %
-A \texttt{GRANT} or \texttt{REVOKE} query on some database object is authorized if the user issuing the query is the database administrator, the owner of the database object, or if the user holds a \emph{grant option} on the privilege he is trying to assign or revoke. \remark{Double check this part. I'm pretty sure that everyone can issue REVOKE commands. They may have no effect though (if the one issuing the command is not the one that granted the privilege.}
+A \texttt{GRANT} query on some database object is authorized if the user issuing the query is the database administrator, the owner of the database object, or if the user holds a \emph{grant option} on the privilege he is trying to assign.
 %
 A grant option can be assigned to a user together with a privilege.
 %
 The grant option gives the user the ability to further delegate a privilege to other users.
+%
+A \texttt{REVOKE} query can be issued by any user, however, it only takes effect if the user issuing the query, has previously successfully granted the privilege that he is trying to revoke.
 
 In PostgreSQL, the SQL access control model is implemented as follows.
 %
@@ -39,12 +41,6 @@ Privileges are encoded using \emph{access control lists} (ACLs).
 ACLs consist of several bitmasks.
 %
 Each bitmask represents the privileges assigned to a database role, further each bit within the mask represents one privilege.
-%
-
-\remark{Please run a spell-checker on the thesis to get rid of the typos.}
-
-\subsection{Implementation in PostgreSQL} 
-\remark{What is the information conveyed in this part? You already discussed part of postgreSQL implementation in the previous section. Why not merging them?}
 
 The implementation in PostgreSQL follows the SQL standard to a large extent. 
 %
@@ -55,25 +51,36 @@ When users submit queries to the database system, depending on the type of the q
 Then the function will, according to the retrieved ACL either authorize the query or not.
 
 \subsection{Algorithm proposed by Guarnieri et al.}
-\remark{Carefully proof-read this part. At the moment, (1)  it is extremely difficult to read, and (2) there are many sentences that do not make sense due to missing verbs and other stuff.}
-
-\remark{Shouldn't you first introduce the notion of SECURE query? Otherwise, this part is rather difficult to understand since you talk about an under-approximation of something that you've never introduced.}
 
 As mentioned in Chapter 1, Guarnieri et al. have devised a new access control mechanism.
 %
 One key component of this mechanism is determining if boolean queries in the relational calculus are secure with respect to the access control policy.
 %
 In the following, we summarize this algorithm from~\cite{guarnieri2016strong}.
+
+The authors of~\cite{guarnieri2016strong} have introduced a formal attacker model.
 %
-Since this undecidable for the relational calculus~\cite{guarnieri2014optimal}, they devised a function \emph{secure} implementing a sound and computable under-approximation of the security of boolean queries. \remark{this what? missing verb. I guess there is a missing sentence here. This one does not make sense.}
+This attacker model, among other things, specifies rules how a attacker can infer information based on the execution of queries.
+%
+For instance such an inference rule specifies that after the successful execution of a \texttt{SELECT} query, the attacker knows the result of the query.
+%
+Further they formalize the knowledge of the attacker using \emph{judgements}.
+%
+A judgement represents all the information an attacker can infer based on his knowledge.
+%
+Additionally judgements are encoded as boolean queries against the database.
+%
+Moreover a judgement is said to be secure, if the attacker is authorized, according to the access control policy, to read all information that can be inferred from his knowledge.
+%
+Since this undecidable for the relational calculus~\cite{guarnieri2014optimal}, they devised a function \emph{secure} implementing a sound and computable under-approximation of the security of boolean queries.
 %
 To compute this under-approximation they use query-rewriting.
-%
+
 A boolean query $\phi$ is rewritten to another query $\phi_{rw}$ such that if $\phi$ is not secure for the user $u$ on the database $db$, then the result of executing $\phi_{rw}$ on $\mathit{db}$ is $\top$.
 %
 The query $\phi_{rw}$ is defined as $\lnot \phi^\top_u \land \phi^\bot_u$, where $\phi^\top_u$ and $\phi^\bot_u$ are defined as follows.
 %
-For each table or view $o$ in the database, the\remark{?} create additional views that represent every possible projection of $o$, together all these relations make up the set $O$.
+For each table or view $o$ in the database, they create additional views that represent every possible projection of $o$, together all these relations make up the set $O$.
 %
 Then they use query containment to compute, again for each table or view $o$, the sets $o^\top$, which contains all relations that contain $o$ and $o^\bot$, which similarly contains all relations that are contained in $o$.
 %

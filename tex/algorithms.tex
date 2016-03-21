@@ -1,15 +1,12 @@
 \section{Algorithms}
-
-As shown in~\cite{guarnieri2014optimal}, query containment is a fundamental problem in database security. \remark{I'm pretty sure I don't show this in the VLDB paper. Why don't you just give some high-level overview of (1) query security, and (2) how the mechanism in \cite{guarnieri2016strong} works. Then, you can just say that you generalize the main components of \cite{guarnieri2016strong} to SQL. (Avoid just repeating the intro and background though).}
 %
-Database access control policies specify how data can be accessed by the database users.
+We define secure queries as such, if their execution does not reveal any sensitive information.
 %
-We can interpret this as assigning each database user a filter, this filter then specifies which actions the user can apply to which tuples of the database.
+As seen in Chapter 3 the mechanism proposed in~\cite{guarnieri2016strong} uses query containment to compute approximations of queries.
 %
-Query containment enables us to argue about the execution of queries in the presence of access control policies.
+However, this mechanism supports only the relational calculus.
 %
-\remark{We use query containment to compute the approximations. However, the access control decision depends on the actual database state, and therefore is not related to query containment, which quantifies over all database states.}
-
+Here we extend the main components to SQL.
 
 \subsection{Query Containment}
 
@@ -155,19 +152,19 @@ In the PROJ-rule we remove the same attribute from both attribute lists, therefo
 
 In SQL queries return bags and not sets.
 %
-Bags however, support the same operations as sets, in particular they support $\cap, \cup, \setminus$. \remark{Spell these operations out, don't use symbols}
+Bags however, support the same operations as sets, in particular they support union, intersection, and subtraction.
 %
 SQL therefore allows to apply these operation to queries.
 %
-The rules INTER1 and INTER2 hold \remark{vs ARE SOUND} since we know that the intersection of two bags contains all elements that appear in both bags.
+The rules INTER1 and INTER2 are sound since we know that the intersection of two bags contains all elements that appear in both bags.
 %
 Therefore the intersection must be a subset of both initial bags.
 %
-The union of two bags contains all elements that appear in at least one of the intial \remark{typo} bags, therefore we can follow that both inital \remark{typo} bags are contained in the union.
+The union of two bags contains all elements that appear in at least one of the initial bags, therefore we can follow that both initial bags are contained in the union.
 %
-The rule EXCEPT holds by the definition of subtracting multisets. \remark{You use bags 'til now. Use the same notation}
+The rule EXCEPT holds by the definition of subtracting bags.
 
-TRANS is transitivity of query containment. Follows directly from transitivity of subset \remark{Missing subject. Missing period at the end of the sentence.}
+TRANS is transitivity of query containment, which directly from transitivity of subset.
 
 \FloatBarrier
 \subsection{Checking security of \texttt{SELECT} queries}
@@ -178,12 +175,12 @@ However this mechanism is too restrictive for implementing a powerful mechanism 
 %
 The authors of~\cite{guarnieri2016strong} have developed an algorithm that checks the security of queries, which relies on query containment and query rewriting. 
 
-For each table or view $\tau$, we denote by $T^\bot$ (respectively $T^\top$) the set of tables or views that are contained in (respectively contain) $\tau$.
+For each table or view $\tau$, we denote by $\tau^\bot$ (respectively $\tau^\top$) the set of tables or views that are contained in (respectively contain) $\tau$.
 %
 This set is computed using the query containment rules introduced in Section 5.1.1.
 %
 
-Here we use these sets to provide the same rewriting as in~\cite{guarnieri2016strong}, but for SQL. \remark{It is not the same rewriting. It even has different properties. It is ``inspired by the one in~\cite{guarnieri2016strong}''.}
+Here we use these sets to provide the a rewriting algorithm inspired by the one in~\cite{guarnieri2016strong}, but for SQL.
 %
 For each query $Q$ the rewriting algorithm produces a secure over-approximation $Q^\top$ and under-approximation $Q^\bot$ of the query.
 
@@ -191,77 +188,104 @@ For each query $Q$ the rewriting algorithm produces a secure over-approximation 
 %
 Our rewriting algorithm is shown in Algorithm~\ref{alg:algorithms:rewrite}.
 %
-The algorithm returns the two queries $Q^\top$ and $Q^\bot$.
+A query $Q$ can have one of three types.
 %
-The query $Q^\top$ is built by replacing each referenced table $\tau$ by the intersection of all the tables $\tau' \in T^\top$ that the user is authorized to read.
+The first type is a \emph{simple} \texttt{SELECT} query, which refers to queries like \texttt{SELECT $A$ FROM $T$ WHERE $\phi$}, where $\phi$ does not contain nested queries.
 %
-$Q^\bot$ is built analogously with unions of all the tables $\tau' \in T^\bot$.
+Second a query that contains nested queries inside the \texttt{WHERE} clause has the type \emph{nested}.
+%
+The third type is called \emph{composite}.
+%
+A composite query $Q$ is consists of at least two simple or nested queries which are composed using \texttt{UNION}, \texttt{INTERSECTION}, or \texttt{EXCEPT}.
 
-\remark{Discuss the properties of these queries. Say clearly that one is the secure under- approx and the other is a secure over- approx of $Q$.
+The rewriting algorithm takes as input three values: A query $Q$, the user $u$ issuing the query, and a boolean indicator $z$.
 %
-If you want, you can even discuss the relation between these queries and possible and certain answers.
-}
+We define a helper function $\mathit{tables}(Q)$ which returns the set tables or views referenced in $Q$, without the the ones referenced in nested or composed queries.
+%
+If $z == \top$ the rewriting algorithm will produce an over-approximation of $Q$, and an under-approximation of $Q$ otherwise.
+%
+For nested queries we define two helper functions: $\mathit{neg}(Q)$ which returns $\top$, if $Q$ is used in a negation such as \texttt{NOT EXISTS} and $\mathit{nested}(Q)$, which returns the set of nested queries inside the \texttt{WHERE} clause of $Q$, or $\emptyset$ if there are no nested queries in $Q$.
+%
+Further we define $\mathit{decomp}(Q)$ for composite queries, which returns the set of all queries that are used inside $Q$, or $\emptyset$ if $Q$ is not composite and $\mathit{ex}(Q)$, which returns $\top$ if $Q$ is used on the right hand side of an \texttt{EXCEPT}.
 
-Since we only consider tables or views from $T^\bot$ and $T^\top$, which, according to the access control policy, are readable to the user, it follows that any query constructed by the rewriting algorithm is secure. \remark{notation! Before you used $o^\top$ and $o^\bot$.}
+For a simple query $Q$ the over-approximation $Q^\top$ is built by replacing each referenced table $\tau$ by the intersection of all the tables $\tau' \in \tau^\top$ that the user is authorized to read.
+%
+$Q^\bot$ is built analogously with unions of all the tables $\tau' \in \tau^\bot$.
+
+For query $Q$ that contains a nested query $Q_n$ inside the \texttt{WHERE} clause, we must first approximate the nested query, and use then this approximation in $Q^\top$.
+%
+Intuitively we compute $Q_n^\top$ for using it in $Q^\top$.
+%
+However if $neg(Q) == \top$ we must compute $Q_n^\bot$, otherwise we cannot argue about containment of $Q$ in $Q^\top$.
+
+If $Q$ is a composite query, we will first obtain the decomposition, i.e., the set of queries inside $Q$. 
+%
+After that we will compute the approximations of each returned query, and compose them back together.
+%
+Similarly to negated nested queries, we must be careful about composite queries of the form \texttt{$Q_1$ EXCEPT $Q_2$}.
+%
+In this case we must again flip the approximation when approximating $Q_2$.
+
+After running the rewriting algorithm for a query $Q$ twice, once with $z == \top$ and once with $z == \bot$ we obtain the two approximations $Q^\top$ and $Q^\bot$.
+%
+Since we only consider tables or views from $\tau^\bot$ and $\tau^\top$, which, according to the access control policy, are readable to the user, it follows that any query constructed by the rewriting algorithm is secure.
 %
 Therefore it is trivial that both queries $Q^\top$ and $Q^\bot$ are secure, since all the tables referenced within are readable to the user issuing the query.
-
-We can further argue that $Q^\bot \subseteq Q \subseteq Q^\top$ since the rewriting algorithm approximates the results of $Q$ from below and above. 
 %
-\remark{The rewriting algorithm does not have anything to do with the result of $Q$. The queries approximate the result.}
-
+We can further argue that $Q^\bot \subseteq Q \subseteq Q^\top$ since the the queries approximate the results of $Q$ from below and above. 
+%
+Therefore $Q^\top$ is a secure over-approximation and $Q^\bot$ a secure under-approximation of $Q$.
 
 \begin{algorithm}
 \caption{Rewriting Algorithm for SQL queries}
 \label{alg:algorithms:rewrite}
 	\SetAlgoLined
-	\KwData{Query $Q$, user $u$}
-	\KwResult{Rewritten queries $Q^\bot$, $Q^\top$}
-	$Q^\top$ = $Q$\;
-	$Q^\bot$ = $Q$\;
-	\ForEach{table $\tau$ referenced in $Q$}{
+	\KwData{Query $Q$, user $u$, boolean $z$}
+	\KwResult{Rewritten query $Q^z$}
+	$Q^z$ = $Q$\;
+	
+	\ForEach{table $\tau \in \mathit{tables}(Q)$}{
 		$T'$ = "("\;
-		$T''$ = "("\;
-		numTop = $|T^\top|$\;
-		numBot = $|T^\bot|$\;
-		\ForEach{table $\tau'$ in $T^\top$}{
-			numTop$--$\;
+		\eIf{$z$}{\texttt{OP} = \texttt{INTERSECTION}\;}{\texttt{OP} = \texttt{UNION}\;}
+		n = $|\tau^z|$\;
+		\ForEach{table $\tau'$ in $\tau^z$}{
+			n$--$\;
 			\If{$u$ is authorized to read $\tau'$}
-				{\eIf{numTop $>$ 0}
-					{$T'$ += "\texttt{(SELECT * FROM $\tau'$) INTERSECTION}"\;}
+				{\eIf{n $>$ 0}
+					{$T'$ += "\texttt{(SELECT * FROM $\tau'$) OP}"\;}
 					{$T'$ += "\texttt{(SELECT * FROM $\tau'$)}"\;}
+				}	
+		}
+		$T'$ += "\texttt{) AS $\tau$}"\;
+		Replace all occurrences of $\tau$ in $Q^z$ with $T'$ \;
+
+	}
+	$Q_n$ = $\mathit{nested}(Q)$\;
+	\If{$Q_n \neq \emptyset$}
+		{
+			\ForEach{$Q_n' \in Q_n$}
+				{
+					\eIf{$\mathit{neg}(Q_n')$}
+					{$Q_n''$ = rewrite($Q_n'$, $u$, $\lnot z$)\;}
+					{$Q_n''$ = rewrite($Q_n'$, $u$, $z$)\;}
+					Replace $Q_n'$ with $Q_n''$ in $Q^z$)\;
 				}
 		}
-  	
-		\ForEach{table $\tau'$ in $T^\bot$}{
-		    numBot$--$\;
-			\If{$u$ is authorized to read $\tau'$}
-				{\eIf{numBot $>$ 0}
-					{$T''$ += "\texttt{(SELECT * FROM $\tau'$) UNION}"\;}
-					{$T''$ += "\texttt{(SELECT * FROM $\tau'$)}"\;}
+	$Q_c$ = $\mathit{decomp}(Q)$\;
+	\If{$Q_c \neq \emptyset$}
+		{
+			\ForEach{$Q_c' \in Q_c$}
+				{
+					\eIf{$\mathit{ex}(Q_c')$}
+					{$Q_c''$ = rewrite($Q_c'$, $u$, $\lnot z$)\;}
+					{$Q_c''$ = rewrite($Q_c'$, $u$, $z$)\;}
+					Replace $Q_c'$ with $Q_c''$ in $Q^z$\;
 				}
+				
 		}
-		$T'$ += "\texttt{) AS $T$}"\;
-		$T''$ += "\texttt{) AS $T$}"\;
-		Replace all occurrences of $T$ in $Q^\top$ with $T'$ \;
-     	Replace all occurrences of $T$ in $Q^\bot$ with $T''$\;
-     }
-
-     \Return ($Q^\top$, $Q^\bot$)\;
-
-\remark{There is an IMPORTANT missing bit from the algorithm. When you're rewriting the tables, if you are in a sub-query that is included in a NOT (for instance something like NOT EXISTS (SELECT * FROM ....) ), then you have to switch the rewriting from $Q^\top$ to $Q^\bot$ (and vice versa).
-%
-I recall we discussed this part a few times.
-%
-This corresponds to the inductive definition of $(\not \phi)^\top_u$ given in~\cite{guarnieri2016strong}.
-%
-I'm pretty sure the algorithm does not work properly without this fix.
-%
-This is something that MUST be addressed before submitting.
-}
+	\Return $Q^z$\;
 
 \end{algorithm}
-
 \smallskip
 \noindent
 {\bf Example:}
@@ -281,16 +305,16 @@ Assume that there is a database user $u$ which has read access to all views, but
 %
 The user $u$ wants to find out who is employed as a Programmer and issues the following query $Q := $ \texttt{SELECT * FROM Programmers}.
 %
-The mappings that are computed for the table \texttt{Programmers} before the rewriting algorithm look as follows: \remark{This is the only place where you use the term ``mapping''. Either you introduce it before, or just reuse the terminology you used when you introduced the $T^\top$ and $T^\bot$ notation.}
+Before the rewriting algorithm we compute the sets $\texttt{Programmer}^\top$ and $\texttt{Programmer}^\bot$:
 \begin{itemize}
-	\item $T^\top = \lbrace \text{\texttt{ProgrammerOrClerk}, \texttt{ProgrammerOrHR}} \rbrace$ \remark{I guess $T^\top$ should be $\texttt{Programmer}^\top$}
-	\item $T^\bot = \lbrace \text{\texttt{YoungProgrammers}, \texttt{OldProgrammers}} \rbrace$
+	\item $\texttt{Programmer}^\top = \lbrace \text{\texttt{ProgrammerOrClerk}, \texttt{ProgrammerOrHR}} \rbrace$ 
+	\item $\texttt{Programmer}^\bot = \lbrace \text{\texttt{YoungProgrammers}, \texttt{OldProgrammers}} \rbrace$
 \end{itemize}
 %
 Therefore the rewriting algorithm will return the following queries:
 \begin{itemize}
-	\item $Q^\top$ = \texttt{SELECT * FROM ((SELECT * FROM ProgrammerOrClerk) INTERSECTION (SELECT * FROM ProgrammerOrHR)) AS Programmer}
-	\item $Q^\bot$ = \texttt{SELECT * FROM ((SELECT * FROM YoungProgrammers) UNION (SELECT * FROM OldProgrammers)) AS Programmer}
+	\item $Q^\top$ = \texttt{SELECT * FROM ((SELECT * FROM ProgrammerOrClerk) INTERSECTION (SELECT * FROM ProgrammerOrHR)) AS Programmer} when executed with $z == \top$.
+	\item $Q^\bot$ = \texttt{SELECT * FROM ((SELECT * FROM YoungProgrammers) UNION (SELECT * FROM OldProgrammers)) AS Programmer} when executed with $z == \bot$.
 \end{itemize}
 
 \subsubsection{Authorization of \texttt{SELECT} queries}
@@ -299,11 +323,11 @@ As we have seen before both the over- and under-approximation are secure, since 
 %
 We have further seen that the inclusions $Q^\bot \subseteq Q$ and $Q \subseteq Q^\top$ hold for the rewritten queries $Q^\bot$ and $Q^\top$.
 %
-The authorization algorithm for \texttt{SELECT} queries is shown in Figure~\ref{alg:algorithms:auth}.
+The authorization algorithm for \texttt{SELECT} queries is shown in Algorithm~\ref{alg:algorithms:auth}.
 %
 For each \texttt{SELECT} query $Q$, the algorithm uses the rewrite function introduced above to obtain the approximations $Q^\top$ and $Q^\bot$.
 %
-Afterwards, the algorithm checks if the tuples returned by $Q^\top$ and $Q^\bot$ are the same, by executing the query  $Q^\top$ \texttt{EXCEPT} $Q^\bot$ and checking if it returns $\emptyset$. \remark{The algorithm does not check whether the tuples returned by $Q^\top$ and $Q^\bot$ are the same. It just checks whether \texttt{EXCEPT } is $\emptyset$. The fact that the results are the same follows from the reasoning below.}
+Afterwards, the algorithm executes the query  $Q^\top$ \texttt{EXCEPT} $Q^\bot$ and checking if it returns $\emptyset$.
 %
 If this is the case, we know that $Q^\top \subseteq Q^\bot$.
 %
@@ -317,7 +341,8 @@ Since both $Q^\top$ and $Q^\bot$ are secure, we can argue that $Q$ is secure as 
 	\SetAlgoLined
 	\KwData{Query $Q$, user $u$}
 	\KwResult{$\top$ or $\bot$}
-	($Q^\top$, $Q^\bot$) = rewrite($Q$)\;
+	$Q^\top$ = rewrite($Q$, $u$, $\top$)\;
+	$Q^\bot$ = rewrite($Q$, $u$, $\bot$)\;
 	$Q'$ = $Q^\top$ + "\texttt{EXCEPT}" + $Q^\bot$\;
 	$R$ = executeQuery($Q'$)\;
 	\eIf{$R$ == $\emptyset$}
@@ -357,8 +382,6 @@ We under-approximate the tuples resulting from a query during the algorithm that
 %
 Therefore it is secure to return the under-approximation to the user.
 %
-Our implementation contains a subset of the introduced inference rules for containment, implementing all of them would result in a better under-approximation. \remark{Again, I wouldn't talk about the implementation since there is no working implementation at the moment. Talking about the implementation would deceive the reader a bit.}
-%
 Algorithm~\ref{alg:algorithms:authtruman} shows how our algorithm can be extended to the Truman model.
 %
 \begin{algorithm}
@@ -367,7 +390,7 @@ Algorithm~\ref{alg:algorithms:authtruman} shows how our algorithm can be extende
 	\SetAlgoLined
 	\KwData{Query $Q$, user $u$}
 	\KwResult{$R$, the tuples returned from the query that are readable to the user}
-	($Q^\top$, $Q^\bot$) = rewrite($Q$)\;
+	$Q^\bot$ = rewrite($Q$, $u$, $\bot$)\;
 	$R$ = executeQuery($Q^\bot$)\;
 	\Return $R$
 

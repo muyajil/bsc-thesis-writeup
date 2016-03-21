@@ -52,28 +52,15 @@ Motivated by the idea of extending Guarnieri et al.'s mechanism~\cite{guarnieri2
 
 First, we refactored the original the implementation of PostgreSQL, a widely used and open source DBMS.
 %
-For this, we isolated the access control mechanism from the rest of the codebase and implemented a general interface for access requests, independant of the type of query. \remark{access requests is undefined.}
+For this, we isolated the access control mechanism from the rest of the codebase and implemented a general interface for requesting access control decisions, independant of the type of query.
 %
 The original PostgreSQL's implementation requires a deep understanding of the backend architecture of DBMS to be able to extend and improve the current access control mechanism.
 %
 Developers can use the refactored version of PostgreSQL to implement new, stronger access control mechanisms, without needing to modify the internals of PostgreSQL.
 
-%<<<<<<< HEAD
-%Important parts of the new access control mechanism proposed by Guarnieri et al. a query rewriting algorithm, and a function which decides the authorization of \texttt{SELECT} queries in the relational calculus. \remark{this sentence doesn't make any sense.}
-
-
 Second, we developed a new access control mechanism for \texttt{SELECT} queries.
 %
 Our mechanism extends the access control mechanism proposed by Guarnieri et al.~\cite{guarnieri2016strong} from the relational calculus to SQL.
-%
-%As a second contribution we extended these parts of the access control mechanism from~\cite{guarnieri2016strong} to SQL.
-%=======
-%Important parts of the new access control mechanism proposed by Guarnieri et al. are a query rewriting algorithm, and a function which decides the authorization of \texttt{SELECT} queries in the relational calculus.
-%>>>>>>> 65bfb5f36d8a39129e1e1cea2ab46bbcf1c487d4
-%
-%This is essential to effectively secure PostgreSQL and prevent leakages of sensitive information. 
-%
-%In more detail we devised a new access control mechanism for \texttt{SELECT} queries.
 %
 Checking the security of \texttt{SELECT} queries is essential to effectively secure  PostgreSQL and prevent leakages of sensitive information. 
 %
@@ -83,22 +70,19 @@ In contrast to the mechanism implemented in PostgreSQL, which rely on naive synt
 %
 As a result, it is more permissive than the PostgreSQL's mechanism, while providing the same security guarantees. 
 %
-%Our mechanism is the first building block to successfully implement strong access control mechanisms, such as the one proposed by Guarnieri et al.
 
 \smallskip
 \noindent
 {\bf Organization.}
 %
-\remark{Get rid of ``will'' and just use present tense. When you start a sentence with ``In chapter X'', you should put a comma after it.}
+In chapter 2, we introduce a motivating example.
 %
-In chapter 2 we will introduce a motivating example.
+In chapter 3, we give background information to access control by comparing current access control mechanism to the model introduced in~\cite{guarnieri2016strong}.
 %
-In chapter 3 we will give background information to access control by comparing current access control mechanism to the model introduced in~\cite{guarnieri2016strong}.
+Afterwards, we introduce the architecture of PostgreSQL and the new access control algorithm in chapter 4. 
 %
-Afterwards, we will introduce the architecture of PostgreSQL and the new access control algorithm in chapter 4. 
+In chapter 5, we begin by showing the formal models of all aspects of the new security defintions and how they are extended from the relational algebra to SQL.  
 %
-In chapter 5 we will begin by showing the formal models of all aspects of the new security defintions and how they are extended from the relational algebra to SQL.  
-%
-In chapter 6 we will introduce some related work to the thesis. 
+In chapter 6, we introduce some related work to the thesis. 
 %
 Finally, in chapter 7 the conclusions are drawn and future possibilities are discussed.

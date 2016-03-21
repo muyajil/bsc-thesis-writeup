@@ -3,12 +3,8 @@
 
 Here, we introduce the architecture of the current version of PostgreSQL.
 %
-We also show how the architecture looks after the refactoring and implementation of the new algorithm.
-%
-\remark{Be careful. There is no running implementation of the new algorithm, so you shouldn't claim it as a result.}
+We also show how the architecture looks after the refactoring of the codebase.
 
-
-%
 \subsection{Current architecture}
 %
 In the current version of PostgreSQL the access control module is not identifiable as a stand-alone module in the backend code of the DBMS.
@@ -31,7 +27,9 @@ After setting everything up, the Postmaster waits for a connection request from 
 %
 When receiving a connection request, the Postmaster forks itself.
 %
-The child process then will either authorize the request and become a \emph{Backend} or reject the request and exit. \remark{Is this ``authorize'' related to access control? What is a request?}
+The child process then will either authorize the connection and become a \emph{Backend} or reject the connection request and exit.
+%
+A connection is authorized if the user and password supplied match an existing database user.
 %
 All the blue boxes in the flowchart represent modules of the Backend of a PostgreSQL server.
 
@@ -126,9 +124,7 @@ ac_return_data authorized(ac_decision_data *decision_data);
 %
 The structs used in the interface are extensible. For each type of query there is a field in both structs, which represent the input and output data for the all queries of this type.
 %
-Each field in the decision data struct corresponds to a function that was migrated to the new module. \remark{This reads a bit weird. Is each field a pointer to a function?}
-%
-The fields in the decision data struct are pointers to further structs that represent the argument list of the respective function.
+The fields in the decision data struct are pointers to further structs that represent the argument list of the functions that were migrated to the new module.
 %
 The structs look as follows: 
 %
@@ -186,7 +182,7 @@ This allows future developers to gradually implement a new algorithm, by identif
 %
 To facilitate the identification of the received query,  we have included an additional field in the decision data, which tells exactly what type of query was received by the interface, e.g., \texttt{INSERT} or \texttt{UPDATE} instead of just identifying it as a non-utility query.
 
-We also added a stack that, at any point of the execution of the database system, holds all queries that are not yet completed, meaning they were not yet interrupted by the access control mechanism nor have returned any tuples to the frontend application. \remark{Instead of talking about returning tuples isn't better to just say commands whose execution is not complete yet?}
+We also added a stack that, at any point of the execution of the database system, holds all queries whose execution is not completed yet.
 %
 This allows developers to always have a clear view on the state of the database system.
 %
@@ -194,7 +190,9 @@ The top element of the stack represents the currently executing query.
 %
 Elements are popped from the stack after the query is completed.
 %
-The Backend process consists of one thread, and it is the only process that accesses the context stack, therefore it does not have to be thread-safe. \remark{What about multiple users connected to the database? Do they have one Backend (and one stack) each?}
+The Backend process consists of one thread, and it is the only process that accesses the context stack, therefore it does not have to be thread-safe.
+%
+Each user connecting to the database will receive his own instance of the Backend and therefore the stack.
 % 
 Each stack's element is a struct that looks as follows:
 %

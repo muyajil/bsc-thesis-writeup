@@ -8,21 +8,13 @@ Further Rizvi et al.~\cite{rizvi2004extending} have identified the Non-truman an
 
 In~\cite{wang2007correctness} the authors introduced a query modification algorithm that would also be suited for the Truman model.
 %
-%<<<<<<< HEAD
-%However, their algorithm will, for each query $q$ issued by user $u$ replace each piece information obtained from $q$, which is not authorized to be read by $u$ by \texttt{NULL}, instead of just not returning it to the $u$.
-%%
-%\remark{Well, they do a bit more :-)}
-%
-%Further in~\cite{rizvi2004extending}.
-%=======
 This algorithm takes another approach at not leaking sensitive information.
 %
 In each query it replaces all referenced tables with a secure under-approximation.
 %
 However, this under-approximation is computed by replacing all sensitive information in the table by \texttt{NULL}.
-%>>>>>>> 65bfb5f36d8a39129e1e1cea2ab46bbcf1c487d4
 %
-\remark{Well, they do a bit more :-) anyway, you should compare what we have, with their solution.}
+This is different from our approach, since we use views to remove sensitive information from a table.
 
 Another query rewriting algorithm is found in~\cite{rizvi2004extending}. 
 %
