@@ -73,7 +73,7 @@ Then they use query containment to compute, again for each table or view $o$, th
 %
 Since query containment is undecidable~\cite{abiteboul1995foundations}, Guarnieri et al. have devised inference rules that produce a sound under-approximation of query containment.
 %
-Then $\phi^\top_u$ is computed by replacing each referenced relation $o$ with the conjunction of all relations $\in o^\top \cap \operatorname{auth}(u)$, where $\operatorname{auth}(u)$ returns all tables and views $\in O$
+Then $\phi^\top_u$ is computed by replacing each referenced relation $o$ with the conjunction of all relations $\in o^\top \cap \operatorname{auth}(u)$, where $\operatorname{auth}(u)$ returns all tables and views $\in O$ that are readable to $u$ according to the access control policy.
 %
 $\phi^\bot$ is computed similarly using $o^\bot$ and the disjunction instead of conjunction.
 
