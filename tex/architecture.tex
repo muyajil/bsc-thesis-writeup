@@ -5,13 +5,17 @@ Here, we introduce the architecture of the current version of PostgreSQL.
 %
 We also show how the architecture looks after the refactoring and implementation of the new algorithm.
 %
+\remark{Be careful. There is no running implementation of the new algorithm, so you shouldn't claim it as a result.}
+
+
+%
 \subsection{Current architecture}
 %
 In the current version of PostgreSQL the access control module is not identifiable as a stand-alone module in the backend code of the DBMS.
 %
 Figure~\ref{figure:postgresql:architecture} shows a flowchart of a PostgreSQL server instance.
 %
-The flowchart shows backend's behaviour.
+The flowchart shows the backend's behaviour.
 %
 \subsubsection{Backend architecture}
 %
@@ -27,7 +31,7 @@ After setting everything up, the Postmaster waits for a connection request from 
 %
 When receiving a connection request, the Postmaster forks itself.
 %
-The child process then will either authorize the request and become a \emph{Backend} or reject the request and exit.
+The child process then will either authorize the request and become a \emph{Backend} or reject the request and exit. \remark{Is this ``authorize'' related to access control? What is a request?}
 %
 All the blue boxes in the flowchart represent modules of the Backend of a PostgreSQL server.
 
@@ -53,7 +57,7 @@ Non-utility commands are forwarded to the \emph{Rewrite Query} module.
 %
 Here the query is rewritten according to the \emph{PostgreSQL Rule System}.
 %
-The PostgreSQL Rule System is a collection of rules on how to rewrite queries in such a way that the other modules of the Backend can optimize the query as good as possible.
+The PostgreSQL Rule System is a collection of rules on how to rewrite queries in such a way that the other modules of the Backend can easily optimize the query.
 The Rule System, for instance, expands views to their respective definition, allowing the Generate Paths module to produce more comprehensive execution paths.
 %
 After the rewriting, the rewritten query is passed to the \emph{Generate Paths} module.
@@ -76,7 +80,7 @@ Access control decisions can be made in any of the the following modules: Traffi
 %
 The functions making these decisions, however, also prepare the system for the upcoming change, by, for instance, returning the address where a new table is allocated.
 %
-Due to the distribution and inconsistency of the access control mechanism, there is no uniform interface that can be called for such a decision.
+Due to the distribution and inconsistency of the access control's code, there is no uniform interface that can be called for such a decision.
 %
 Furthermore,  the mechanism is, sometimes, closely connected to the internals of the database, making the implementation of a new mechanism nearly impossible without refactoring the code.
 %
@@ -122,7 +126,7 @@ ac_return_data authorized(ac_decision_data *decision_data);
 %
 The structs used in the interface are extensible. For each type of query there is a field in both structs, which represent the input and output data for the all queries of this type.
 %
-Each field in the decision data struct corresponds to a function that was migrated to the new module.
+Each field in the decision data struct corresponds to a function that was migrated to the new module. \remark{This reads a bit weird. Is each field a pointer to a function?}
 %
 The fields in the decision data struct are pointers to further structs that represent the argument list of the respective function.
 %
@@ -182,7 +186,7 @@ This allows future developers to gradually implement a new algorithm, by identif
 %
 To facilitate the identification of the received query,  we have included an additional field in the decision data, which tells exactly what type of query was received by the interface, e.g., \texttt{INSERT} or \texttt{UPDATE} instead of just identifying it as a non-utility query.
 
-We also added a stack that, at any point of the execution of the database system, holds all queries that are not yet completed, meaning they were not yet interrupted by the access control mechanism nor have they returned any tuples to the frontend application.
+We also added a stack that, at any point of the execution of the database system, holds all queries that are not yet completed, meaning they were not yet interrupted by the access control mechanism nor have returned any tuples to the frontend application. \remark{Instead of talking about returning tuples isn't better to just say commands whose execution is not complete yet?}
 %
 This allows developers to always have a clear view on the state of the database system.
 %
@@ -190,7 +194,7 @@ The top element of the stack represents the currently executing query.
 %
 Elements are popped from the stack after the query is completed.
 %
-The Backend process consists of one thread, further it is the only process that accesses the context stack, therefore it does not have to be thread-safe.
+The Backend process consists of one thread, and it is the only process that accesses the context stack, therefore it does not have to be thread-safe. \remark{What about multiple users connected to the database? Do they have one Backend (and one stack) each?}
 % 
 Each stack's element is a struct that looks as follows:
 %
@@ -213,13 +217,13 @@ The invoker is relevant if the query is executed under other privileges than the
 %
 A context also contains the query in text form and as a parsed abstract syntax tree.
 %
-Also we included three boolean values: ``authorized'' indicates if the query is authorized, ``rewritten'' tells us if the query was rewritten as part of the access control mechanism, and ``authorizesnext'' is used if the query authorizes the query that is below in the context stack. 
+We also included three boolean values: ``authorized'' indicates if the query is authorized, ``rewritten'' tells us if the query was rewritten as part of the access control mechanism, and ``authorizesnext'' is used if the query authorizes the query that is below in the context stack. 
 %
 The fields ``rewritten'' and ``authorizesnext'' are used by our algorithm.
 %
 The field ``rewritten'' is set to $\top$ after our algorithm has rewritten a query and submits it to the database. 
 %
-Since the rewritten query is processed the same way as any other query, we need this field prevent the access control mechanism to rewrite the query again.
+Since the rewritten query is processed the same way as any other query, we need this field to prevent the access control mechanism to rewrite the query again.
 %
 Further the result obtained from the rewritten query will determine the decision if the original query is authorized.
 %

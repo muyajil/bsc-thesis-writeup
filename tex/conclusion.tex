@@ -12,9 +12,9 @@ The current PostgreSQL's architecture is not adequate to support these new mecha
 %
 We performed  major modifications to the PostgreSQL's code addressing access control.
 %
-We changed the behaviour of certain Backend modules such as the executor, further we moved all access control relevant code to a stand-alone module. 
+We changed the behaviour of certain Backend modules such as the executor, and we moved all access control relevant code to a stand-alone module. 
 %
-Moreover we created an interface to said module.
+Moreover, we created an interface to said module.
 %
 These modifications pave the way for the implementation of new access control mechanisms by providing developers with a uniform interface and clear code segregation.
 
@@ -23,7 +23,7 @@ Second, we developed an algorithm for deciding whether queries are secure or not
 %
 Our algorithm directly applies to the SQL language.
 %
-As shown also in~\cite{guarnieri2016strong}, this kind of algorithms is an important building block for novel access control mechanisms that aim at prevent the leakage of sensitive information.
+As shown also in~\cite{guarnieri2016strong}, this kind of algorithms is an important building block for novel access control mechanisms that aim at  preventing the leakage of sensitive information.
 %
 Existing algorithms, such as those proposed by the SQL standard and implemented in PostgreSQL, are overly restrictive.
 %

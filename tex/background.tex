@@ -6,9 +6,9 @@ The conclusions made in the following paragraphs are backed by an analysis of th
 
 \subsection{SQL access control model}
 
-The SQL standard defines a number of privileges, where each privilege represents an operation that can be done in the database, such as creating tables, creating triggers, or updating tables.
+The SQL standard defines a number of privileges, where each privilege represents an operation that can be performed in the database, such as creating tables, creating triggers, or updating tables.
 
-Privileges can be assigned either on the database or on a \emph{database object}.
+Privileges can be assigned either on the database or on a \emph{database object}. \remark{Isn't the database object an integral part of the privilege? The privilege is SELECT ON TABLE, not just SELECT.}
 %
 A database object refers to an internal structure of the database, such as a table, a trigger, or a view. 
 %
@@ -18,11 +18,11 @@ The privileges can be assigned to users using \texttt{GRANT} commands and revoke
 %
 Note that the execution of  \texttt{GRANT} and \texttt{REVOKE} is regulated as well by the access control policy. 
 %
-A \texttt{GRANT} or \texttt{REVOKE} query on some database object is authorized if the user issuing the query is the database administrator, the owner of the database object, or if the user holds a \emph{grant option} on the privilege he is trying to assing or revoke.
+A \texttt{GRANT} or \texttt{REVOKE} query on some database object is authorized if the user issuing the query is the database administrator, the owner of the database object, or if the user holds a \emph{grant option} on the privilege he is trying to assign or revoke. \remark{Double check this part. I'm pretty sure that everyone can issue REVOKE commands. They may have no effect though (if the one issuing the command is not the one that granted the privilege.}
 %
 A grant option can be assigned to a user together with a privilege.
 %
-The grant option gives the user the ability to delegate a privilege further.
+The grant option gives the user the ability to further delegate a privilege to other users.
 
 In PostgreSQL, the SQL access control model is implemented as follows.
 %
@@ -38,12 +38,15 @@ Privileges are encoded using \emph{access control lists} (ACLs).
 %
 ACLs consist of several bitmasks.
 %
-Each bitmask represents the privileges assinged to a database role, further each bit within the mask represents one privilege.
+Each bitmask represents the privileges assigned to a database role, further each bit within the mask represents one privilege.
 %
 
-\subsection{Implementation in PostgreSQL}
+\remark{Please run a spell-checker on the thesis to get rid of the typos.}
 
-The implementation in PostgreSQL follows the SQL standard to large extents. 
+\subsection{Implementation in PostgreSQL} 
+\remark{What is the information conveyed in this part? You already discussed part of postgreSQL implementation in the previous section. Why not merging them?}
+
+The implementation in PostgreSQL follows the SQL standard to a large extent. 
 %
 Even though the implementation in PostgreSQL is rather close to the SQL standard, modifications are not straight forward, since, as we will see later, the different parts are spread in different modules of the DBMS.
 
@@ -52,29 +55,32 @@ When users submit queries to the database system, depending on the type of the q
 Then the function will, according to the retrieved ACL either authorize the query or not.
 
 \subsection{Algorithm proposed by Guarnieri et al.}
+\remark{Carefully proof-read this part. At the moment, (1)  it is extremely difficult to read, and (2) there are many sentences that do not make sense due to missing verbs and other stuff.}
 
-As mentioned in Chapter 1 Guarnieri et al. have devised a new access control mechanism.
+\remark{Shouldn't you first introduce the notion of SECURE query? Otherwise, this part is rather difficult to understand since you talk about an under-approximation of something that you've never introduced.}
+
+As mentioned in Chapter 1, Guarnieri et al. have devised a new access control mechanism.
 %
 One key component of this mechanism is determining if boolean queries in the relational calculus are secure with respect to the access control policy.
 %
-In the following we summarize this algorithm from~\cite{guarnieri2016strong}.
+In the following, we summarize this algorithm from~\cite{guarnieri2016strong}.
 %
-Since this undecidable for the relational calculus~\cite{guarnieri2014optimal}, they devised a function \emph{secure} which implements a sound and computable under-approximation of the security of boolean queries.
+Since this undecidable for the relational calculus~\cite{guarnieri2014optimal}, they devised a function \emph{secure} implementing a sound and computable under-approximation of the security of boolean queries. \remark{this what? missing verb. I guess there is a missing sentence here. This one does not make sense.}
 %
 To compute this under-approximation they use query-rewriting.
 %
-A boolean query $\phi$ is rewritten to another query $\phi_{rw}$ such that if $\phi$ is not secure for the user $u$ issuing it to the database $db$ then $\phi_{rw}$ evaluates to $\top$ if issued to $db$ by $u$.
+A boolean query $\phi$ is rewritten to another query $\phi_{rw}$ such that if $\phi$ is not secure for the user $u$ on the database $db$, then the result of executing $\phi_{rw}$ on $\mathit{db}$ is $\top$.
 %
 The query $\phi_{rw}$ is defined as $\lnot \phi^\top_u \land \phi^\bot_u$, where $\phi^\top_u$ and $\phi^\bot_u$ are defined as follows.
 %
-For each table or view $o$ in the database, the create additional views that represent every possible projection of $o$, together all these relations make up the set $O$.
+For each table or view $o$ in the database, the\remark{?} create additional views that represent every possible projection of $o$, together all these relations make up the set $O$.
 %
 Then they use query containment to compute, again for each table or view $o$, the sets $o^\top$, which contains all relations that contain $o$ and $o^\bot$, which similarly contains all relations that are contained in $o$.
 %
 Since query containment is undecidable~\cite{abiteboul1995foundations}, Guarnieri et al. have devised inference rules that produce a sound under-approximation of query containment.
 %
-Then $\phi^\top_u$ is computed by replacing each referenced relation $o$ with the conjunction of all relations $\in o^\top \cap \operatorname{auth}(u)$, where $\operatorname{auth}(u)$ returns all tables and views $\in O$ that are readable to $u$ according to the access control policy.
+Then $\phi^\top_u$ is computed by replacing each referenced relation $o$ with the conjunction of all relations in the set $o^\top \cap \operatorname{auth}(u)$, where $\operatorname{auth}(u)$ returns all tables and views $O$ that are readable to $u$ according to the access control policy.  
 %
 $\phi^\bot$ is computed similarly using $o^\bot$ and the disjunction instead of conjunction.
 
-In chapter 5 we will show how we extend the inference rules for query containment and the rewriting algorithm to support SQL.
+In chapter 5, we extend the inference rules for query containment and the rewriting algorithm to support SQL.

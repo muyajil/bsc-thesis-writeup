@@ -1,16 +1,19 @@
 \section{Algorithms}
 
-As shown in~\cite{guarnieri2014optimal} query containment is a fundamental problem in database security.
+As shown in~\cite{guarnieri2014optimal}, query containment is a fundamental problem in database security. \remark{I'm pretty sure I don't show this in the VLDB paper. Why don't you just give some high-level overview of (1) query security, and (2) how the mechanism in \cite{guarnieri2016strong} works. Then, you can just say that you generalize the main components of \cite{guarnieri2016strong} to SQL. (Avoid just repeating the intro and background though).}
 %
 Database access control policies specify how data can be accessed by the database users.
 %
 We can interpret this as assigning each database user a filter, this filter then specifies which actions the user can apply to which tuples of the database.
 %
 Query containment enables us to argue about the execution of queries in the presence of access control policies.
+%
+\remark{We use query containment to compute the approximations. However, the access control decision depends on the actual database state, and therefore is not related to query containment, which quantifies over all database states.}
+
 
 \subsection{Query Containment}
 
-Query containment is the problem of determining given two queries $Q_1$ and $Q_2$ whether the result of $Q_1$ is always contained in the result of $Q_2$. %Namely, we   we want to answer if the tuples returned from $Q_1$ are always, i.e., in all database states, contained in the ones returned from $Q_2$.
+Query containment is the problem of determining, given two queries $Q_1$ and $Q_2$, whether the result of $Q_1$ is always contained in the result of $Q_2$. %Namely, we   we want to answer if the tuples returned from $Q_1$ are always, i.e., in all database states, contained in the ones returned from $Q_2$.
 
 Query containment can be formalized as follows.
 %
@@ -21,7 +24,7 @@ We say that \emph{$Q_1$ is contained in $Q_2$}, denoted by $Q_1 \subseteq Q_2$, 
 
 Given two queries $Q_1$ and $Q_2$, the query containment problem is, therefore, to determine whether $Q_1 \subseteq Q_2$ holds.
 %
-This problem is well-known to be undecidable for relational calculus and SQL.~\cite{abiteboul1995foundations}.
+This problem is well-known to be undecidable for relational calculus and SQL~\cite{abiteboul1995foundations}.
 
 \subsubsection{Query Containment Approximation}
 
@@ -146,25 +149,25 @@ In the OR-rules however, we widen the filter by adding a boolean expression in d
 
 A requirement for containment is that both queries project the same number of attributes in the attribute list. 
 %
-Tuples resulting from two queries with attribute lists or different lenghts are not comparable, since they can never be equal.
+Tuples resulting from two queries with attribute lists of different lengths are not comparable, since they can never be equal.
 %
 In the PROJ-rule we remove the same attribute from both attribute lists, therefore the actual tuples returned are the same, which means containment still holds.
 
 In SQL queries return bags and not sets.
 %
-Bags however, support the same operations as sets, in particular they support $\cap, \cup, \setminus$.
+Bags however, support the same operations as sets, in particular they support $\cap, \cup, \setminus$. \remark{Spell these operations out, don't use symbols}
 %
 SQL therefore allows to apply these operation to queries.
 %
-The rules INTER1 and INTER2 hold since we know that the intersection of two bags contains all elements that appear in both bags.
+The rules INTER1 and INTER2 hold \remark{vs ARE SOUND} since we know that the intersection of two bags contains all elements that appear in both bags.
 %
 Therefore the intersection must be a subset of both initial bags.
 %
-The union of two bags contains all elements that appear in at least one of the intial bags, therefore we can follow that both inital bags are contained in the union.
+The union of two bags contains all elements that appear in at least one of the intial \remark{typo} bags, therefore we can follow that both inital \remark{typo} bags are contained in the union.
 %
-The rule EXCEPT holds by the definition of subtracting multisets.
+The rule EXCEPT holds by the definition of subtracting multisets. \remark{You use bags 'til now. Use the same notation}
 
-TRANS is transitivity of query containment. Follows directly from transitivity of subset
+TRANS is transitivity of query containment. Follows directly from transitivity of subset \remark{Missing subject. Missing period at the end of the sentence.}
 
 \FloatBarrier
 \subsection{Checking security of \texttt{SELECT} queries}
@@ -180,7 +183,7 @@ For each table or view $T$, we denote by $T^\bot$ (respectively $T^\top$) the se
 This set is computed using the query containment rules introduced in Section 5.1.1.
 %
 
-Here we use these sets to provide the same rewriting as in~\cite{guarnieri2016strong}, but for SQL.
+Here we use these sets to provide the same rewriting as in~\cite{guarnieri2016strong}, but for SQL. \remark{It is not the same rewriting. It even has different properties. It is ``inspired by the one in~\cite{guarnieri2016strong}''.}
 %
 For each query $Q$ the rewriting algorithm produces a secure over-approximation $Q^\top$ and under-approximation $Q^\bot$ of the query.
 
@@ -194,12 +197,20 @@ The query $Q^\top$ is built by replacing each referenced table $\tau$ by the int
 %
 $Q^\bot$ is built analogously with unions of all the tables $\tau' \in T^\bot$.
 
-Since we only consider tables or views from $T^\bot$ and $T^\top$, which, according to the access control policy, are readable to the user, it follows that any query constructed by the rewriting algorithm is secure.
+\remark{Discuss the properties of these queries. Say clearly that one is the secure under- approx and the other is a secure over- approx of $Q$.
+%
+If you want, you can even discuss the relation between these queries and possible and certain answers.
+}
+
+Since we only consider tables or views from $T^\bot$ and $T^\top$, which, according to the access control policy, are readable to the user, it follows that any query constructed by the rewriting algorithm is secure. \remark{notation! Before you used $o^\top$ and $o^\bot$.}
 %
 Therefore it is trivial that both queries $Q^\top$ and $Q^\bot$ are secure, since all the tables referenced within are readable to the user issuing the query.
 
 We can further argue that $Q^\bot \subseteq Q \subseteq Q^\top$ since the rewriting algorithm approximates the results of $Q$ from below and above. 
 %
+\remark{The rewriting algorithm does not have anything to do with the result of $Q$. The queries approximate the result.}
+
+
 \begin{algorithm}
 \caption{Rewriting Algorithm for SQL queries}
 \label{alg:algorithms:rewrite}
@@ -238,6 +249,17 @@ We can further argue that $Q^\bot \subseteq Q \subseteq Q^\top$ since the rewrit
 
      \Return ($Q^\top$, $Q^\bot$)\;
 
+\remark{There is an IMPORTANT missing bit from the algorithm. When you're rewriting the tables, if you are in a sub-query that is included in a NOT (for instance something like NOT EXISTS (SELECT * FROM ....) ), then you have to switch the rewriting from $Q^\top$ to $Q^\bot$ (and vice versa).
+%
+I recall we discussed this part a few times.
+%
+This corresponds to the inductive definition of $(\not \phi)^\top_u$ given in~\cite{guarnieri2016strong}.
+%
+I'm pretty sure the algorithm does not work properly without this fix.
+%
+This is something that MUST be addressed before submitting.
+}
+
 \end{algorithm}
 
 \smallskip
@@ -259,9 +281,9 @@ Assume that there is a database user $u$ which has read access to all views, but
 %
 The user $u$ wants to find out who is employed as a Programmer and issues the following query $Q := $ \texttt{SELECT * FROM Programmers}.
 %
-The mappings that are computed for the table \texttt{Programmers} before the rewriting algorithm look as follows:
+The mappings that are computed for the table \texttt{Programmers} before the rewriting algorithm look as follows: \remark{This is the only place where you use the term ``mapping''. Either you introduce it before, or just reuse the terminology you used when you introduced the $T^\top$ and $T^\bot$ notation.}
 \begin{itemize}
-	\item $T^\top = \lbrace \text{\texttt{ProgrammerOrClerk}, \texttt{ProgrammerOrHR}} \rbrace$
+	\item $T^\top = \lbrace \text{\texttt{ProgrammerOrClerk}, \texttt{ProgrammerOrHR}} \rbrace$ \remark{I guess $T^\top$ should be $\texttt{Programmer}^\top$}
 	\item $T^\bot = \lbrace \text{\texttt{YoungProgrammers}, \texttt{OldProgrammers}} \rbrace$
 \end{itemize}
 %
@@ -277,11 +299,11 @@ As we have seen before both the over- and under-approximation are secure, since 
 %
 We have further seen that the inclusions $Q^\bot \subseteq Q$ and $Q \subseteq Q^\top$ hold for the rewritten queries $Q^\bot$ and $Q^\top$.
 %
-The authorization algorithm for \texttt{SELECT} queries is shown in figure~\ref{alg:algorithms:auth}
+The authorization algorithm for \texttt{SELECT} queries is shown in Figure~\ref{alg:algorithms:auth}.
 %
 For each \texttt{SELECT} query $Q$, the algorithm uses the rewrite function introduced above to obtain the approximations $Q^\top$ and $Q^\bot$.
 %
-Afterwards, the algorithm checks if the tuples returned by $Q^\top$ and $Q^\bot$ are the same, by executing the query  $Q^\top$ \texttt{EXCEPT} $Q^\bot$ and checking if it returns $\emptyset$.
+Afterwards, the algorithm checks if the tuples returned by $Q^\top$ and $Q^\bot$ are the same, by executing the query  $Q^\top$ \texttt{EXCEPT} $Q^\bot$ and checking if it returns $\emptyset$. \remark{The algorithm does not check whether the tuples returned by $Q^\top$ and $Q^\bot$ are the same. It just checks whether \texttt{EXCEPT } is $\emptyset$. The fact that the results are the same follows from the reasoning below.}
 %
 If this is the case, we know that $Q^\top \subseteq Q^\bot$.
 %
@@ -335,7 +357,7 @@ We under-approximate the tuples resulting from a query during the algorithm that
 %
 Therefore it is secure to return the under-approximation to the user.
 %
-Our implementation contains a subset of the introduced inference rules for containment, implementing all of them would result in a better under-approximation.
+Our implementation contains a subset of the introduced inference rules for containment, implementing all of them would result in a better under-approximation. \remark{Again, I wouldn't talk about the implementation since there is no working implementation at the moment. Talking about the implementation would deceive the reader a bit.}
 %
 Algorithm~\ref{alg:algorithms:authtruman} shows how our algorithm can be extended to the Truman model.
 %
