@@ -63,7 +63,7 @@ Since this undecidable for the relational calculus~\cite{guarnieri2014optimal}, 
 %
 To compute this under-approximation they use query-rewriting.
 %
-A boolean query $\phi$ is rewritten to another query $\phi_{rw}$ such that if $\phi$ is secure for the user $u$ issuing it to the database $db$ then $\phi_{rw}$ evaluates to true as well if issued to $db$ by $u$.
+A boolean query $\phi$ is rewritten to another query $\phi_{rw}$ such that if $\phi$ is not secure for the user $u$ issuing it to the database $db$ then $\phi_{rw}$ evaluates to $\top$ if issued to $db$ by $u$.
 %
 The query $\phi_{rw}$ is defined as $\lnot \phi^\top_u \land \phi^\bot_u$, where $\phi^\top_u$ and $\phi^\bot_u$ are defined as follows.
 %
