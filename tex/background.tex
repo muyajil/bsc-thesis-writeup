@@ -45,9 +45,7 @@ Each bitmask represents the privileges assinged to a database role, further each
 
 The implementation in PostgreSQL follows the SQL standard to large extents. 
 %
-There are however subtle differences between the former and the latter.
-%
-\remark{add a better example than triggers}
+Even though the implementation in PostgreSQL is rather close to the SQL standard, modifications are not straight forward, since, as we will see later, the different parts are spread in different modules of the DBMS.
 
 When users submit queries to the database system, depending on the type of the query, an internal function is called, which among other things, retrieves the ACL for objects that are referenced in the query and checks the privileges.
 %
@@ -57,24 +55,26 @@ Then the function will, according to the retrieved ACL either authorize the quer
 
 As mentioned in Chapter 1 Guarnieri et al. have devised a new access control mechanism.
 %
-One key component of this mechanism is deciding if boolean queries in the relational calculus are secure with respect to the access control policy.
+One key component of this mechanism is determining if boolean queries in the relational calculus are secure with respect to the access control policy.
 %
-For this they devised rules on how to compute under-approximations of query containment.
+In the following we summarize this algorithm from~\cite{guarnieri2016strong}.
 %
-They used these approximations to generate secure under- and over-approximations of queries using a rewriting mechanism.
+Since this undecidable for the relational calculus~\cite{guarnieri2014optimal}, they devised a function \emph{secure} which implements a sound and computable under-approximation of the security of boolean queries.
 %
-They further devised a function \emph{secure} which uses the rewriting mechanism to decide the authorization of queries.
+To compute this under-approximation they use query-rewriting.
+%
+A boolean query $\phi$ is rewritten to another query $\phi_{rw}$ such that if $\phi$ is secure for the user $u$ issuing it to the database $db$ then $\phi_{rw}$ evaluates to true as well if issued to $db$ by $u$.
+%
+The query $\phi_{rw}$ is defined as $\lnot \phi^\top_u \land \phi^\bot_u$, where $\phi^\top_u$ and $\phi^\bot_u$ are defined as follows.
+%
+For each table or view $o$ in the database, the create additional views that represent every possible projection of $o$, together all these relations make up the set $O$.
+%
+Then they use query containment to compute, again for each table or view $o$, the sets $o^\top$, which contains all relations that contain $o$ and $o^\bot$, which similarly contains all relations that are contained in $o$.
+%
+Since query containment is undecidable~\cite{abiteboul1995foundations}, Guarnieri et al. have devised inference rules that produce a sound under-approximation of query containment.
+%
+Then $\phi^\top_u$ is computed by replacing each referenced relation $o$ with the conjunction of all relations $\in o^\top \cap \operatorname{auth}(u)$, where $\operatorname{auth}(u)$ returns all tables and views $\in O$
+%
+$\phi^\bot$ is computed similarly using $o^\bot$ and the disjunction instead of conjunction.
 
-
-
-
-%
-These findings are extended to support SQL in chapter 5.
-
-\remark{This does not add much to what we said in the introduction. I'd give some more details about the algorithm.
-%
-The idea is that you want to extend the algorithm from RC to SQL.
-%
-So, first explain how the algorithm work (and the main components) for RC.
-%
-Afterwards, you can just say that you want to extend it to SQL, and you explain, component by component, how you achieved it.}
+In chapter 5 we will show how we extend the inference rules for query containment and the rewriting algorithm to support SQL.
