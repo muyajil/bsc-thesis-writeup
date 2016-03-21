@@ -23,14 +23,6 @@ Given two queries $Q_1$ and $Q_2$, the query containment problem is, therefore, 
 %
 This problem is well-known to be undecidable for relational calculus and SQL.~\cite{abiteboul1995foundations}.
 
-We define the current state of a database as $db$.
-%
-We define the fuction $r(Q, db)$ which returns the bag of tuples returned from issuing $Q$ to $db$.
-%
-A query $Q_1$ is contained in another query $Q_2$ if $r(Q_1, db) \subseteq r(Q_2, db)$ $\forall db$, i.e., for all datbase states.
-
-This problem is well-known to be undecidable for relational calculus and SQL.~\cite{abiteboul1995foundations}.
-
 \subsubsection{Query Containment Approximation}
 
 As shown in Chapter 3, query containment is a key part in access control algorithms such as the one proposed in~\cite{guarnieri2016strong}.
