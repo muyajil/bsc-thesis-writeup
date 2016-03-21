@@ -10,6 +10,14 @@ In~\cite{wang2007correctness} the authors introduced a query modification algori
 %
 However, their algorithm will, for each query $q$ issued by user $u$ replace each piece information obtained from $q$, which is not authorized to be read by $u$ by \texttt{NULL}, instead of just not returning it to the $u$.
 
-Further in~\cite{rizvi2004extending}.
-
-\remark{TODO - Compare our rewriting to those in \cite{rizvi2004extending} (non-truman)}
+Another query rewriting algorithm is found in~\cite{rizvi2004extending}. 
+%
+Here the authors use the concept of \emph{authorization views}.
+%
+For each relation they create an authorization view, which only contains the information that the database user is allowed to read.
+%
+In the Truman model they use these views by transparently substituting each referenced relation in the query with the corresponding authorization view.
+%
+Moreover they use these views in the Non-truman model to determine the authorization of queries, namely a query is authorized if it can be answered using only the authorization views.
+%
+Therefore the authorization of a query again boils down to query containment, i.e., a query $q$ is authorized if we can rewrite it to a query $q'$ that only uses the authorization views such that $q$ is equivalent to $q'$ in all database states.
