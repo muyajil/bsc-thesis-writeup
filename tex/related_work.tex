@@ -8,6 +8,8 @@ Further Rizvi et al.~\cite{rizvi2004extending} have identified the Non-truman an
 
 In~\cite{wang2007correctness} the authors introduced a query modification algorithm that would also be suited for the Truman model.
 %
+In this algorithm they also create two approximations of the query result, namely a \emph{low evaluation}, which contains all the tuples that are certainly in the result, and a \emph{high evaluation}, which contains tuples that are possibly in the result.
+%
 However, their algorithm will, for each query $q$ issued by user $u$ replace each piece information obtained from $q$, which is not authorized to be read by $u$ by \texttt{NULL}, instead of just not returning it to the $u$.
 
 Another query rewriting algorithm is found in~\cite{rizvi2004extending}. 
